@@ -1045,6 +1045,80 @@
     font-style: italic;
   }
   .celebrate-msg:empty { display: none; }
+
+  /* Partner-review AI feedback block. Replaces the templated narrative when
+     the /api/feedback function returns successfully. Templated narrative is
+     the silent fallback if the function errors or times out. */
+  .celebrate-ai {
+    text-align: left;
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    background: var(--p1-soft);
+    border-radius: var(--r-md);
+    border-left: 3px solid var(--p1);
+  }
+  .celebrate-ai.loading {
+    background: var(--surface-2);
+    border-left-color: var(--ink-3);
+  }
+  .celebrate-ai-head {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--p1-deep);
+    margin-bottom: 8px;
+  }
+  .celebrate-ai.loading .celebrate-ai-head { color: var(--ink-3); }
+  .celebrate-ai-headline {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink);
+    line-height: 1.45;
+    margin-bottom: 10px;
+  }
+  .celebrate-ai-headline:empty { display: none; }
+  .celebrate-ai ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .celebrate-ai li {
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--ink-2);
+    padding-left: 16px;
+    position: relative;
+  }
+  .celebrate-ai li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--p1);
+    font-weight: 700;
+  }
+  .celebrate-ai-loading-text {
+    font-size: 12.5px;
+    color: var(--ink-3);
+    font-style: italic;
+  }
+  .celebrate-ai-loading-text::after {
+    content: '…';
+    display: inline-block;
+    width: 1em;
+    animation: aiDots 1.2s steps(4, end) infinite;
+  }
+  @keyframes aiDots {
+    0%   { content: ''; }
+    25%  { content: '.'; }
+    50%  { content: '..'; }
+    75%  { content: '…'; }
+    100% { content: '…'; }
+  }
   .celebrate-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1302,6 +1376,12 @@
     <div class="celebrate-issues" id="celIssues" style="display:none;">
       <div class="celebrate-issues-head" id="celIssuesHead">Staffing observations</div>
       <ul id="celIssuesList"></ul>
+    </div>
+    <div class="celebrate-ai" id="celAi" style="display:none;">
+      <div class="celebrate-ai-head" id="celAiHead">Partner review</div>
+      <div class="celebrate-ai-headline" id="celAiHeadline"></div>
+      <ul id="celAiBullets"></ul>
+      <div class="celebrate-ai-loading-text" id="celAiLoading" style="display:none;">Reviewing scope</div>
     </div>
     <p class="celebrate-msg" id="celMsg"></p>
     <div class="celebrate-actions">
@@ -1995,6 +2075,78 @@ function updateTestBtn() {
   }
 }
 
+// =============================================================
+// AI FEEDBACK
+// Posts the player's plan + outcome to /api/feedback for a tailored
+// partner-style review. Falls back silently to templated NARRATIVE if
+// the function errors, returns a bad shape, or takes longer than 6s.
+// =============================================================
+const AI_TIMEOUT_MS = 6000;
+let celebrateToken = 0;
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
+function buildAiPayload(projIdx, cost, variance, points, issues) {
+  const p = PROJECTS[projIdx];
+  const deliverables = p.deliverables.map((d, i) => {
+    const hrsForDel = state.hours[projIdx][i];
+    const staffing = ROLES
+      .map(r => ({ role: r.name, hrs: hrsForDel[r.id] || 0 }))
+      .filter(x => x.hrs > 0);
+    const calc = calcDeliverable(projIdx, i);
+    return { name: d.name, hrsTotal: calc.hrs, cost: calc.cost, staffing };
+  });
+  return {
+    engagement: {
+      name: p.name,
+      type: (PROJECT_TYPES[p.type] || {}).label || p.type,
+      brief: p.desc,
+      budget: p.budget,
+      tolerance: p.tol
+    },
+    deliverables,
+    issues: issues.map(i => ({
+      deliverable: i.deliverable,
+      severity: i.severity,
+      missing: i.groupLabel,
+      gap: Math.max(0, i.minHrs - i.actualHrs)
+    })),
+    outcome: {
+      totalFees: Math.round(cost),
+      variancePct: (variance * 100).toFixed(1),
+      score: points
+    }
+  };
+}
+
+async function requestAiFeedback(payload) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+  try {
+    const res = await fetch('/api/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (typeof data.headline !== 'string' || !Array.isArray(data.bullets)) return null;
+    return {
+      headline: data.headline,
+      bullets: data.bullets.filter(b => typeof b === 'string' && b.trim().length > 0).slice(0, 6)
+    };
+  } catch {
+    clearTimeout(timeoutId);
+    return null;
+  }
+}
+
 function submit() {
   const p = PROJECTS[state.current];
   const { cost, hrs } = calcProject(state.current);
@@ -2215,6 +2367,43 @@ function buildNarrative(points, issues, cost, projIdx) {
   return parts.join(' ');
 }
 
+function renderAiFeedback(result, fallbackText) {
+  const aiEl = document.getElementById('celAi');
+  const aiHead = document.getElementById('celAiHead');
+  const aiHeadline = document.getElementById('celAiHeadline');
+  const aiBullets = document.getElementById('celAiBullets');
+  const aiLoading = document.getElementById('celAiLoading');
+  const msgEl = document.getElementById('celMsg');
+  if (result) {
+    aiEl.classList.remove('loading');
+    aiEl.style.display = '';
+    aiHead.textContent = 'Partner review';
+    aiHeadline.textContent = result.headline;
+    aiBullets.innerHTML = result.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join('');
+    aiLoading.style.display = 'none';
+    msgEl.textContent = '';
+  } else {
+    aiEl.style.display = 'none';
+    msgEl.textContent = fallbackText || '';
+  }
+}
+
+function showAiLoading() {
+  const aiEl = document.getElementById('celAi');
+  const aiHead = document.getElementById('celAiHead');
+  const aiHeadline = document.getElementById('celAiHeadline');
+  const aiBullets = document.getElementById('celAiBullets');
+  const aiLoading = document.getElementById('celAiLoading');
+  const msgEl = document.getElementById('celMsg');
+  aiEl.style.display = '';
+  aiEl.classList.add('loading');
+  aiHead.textContent = 'Partner review';
+  aiHeadline.textContent = '';
+  aiBullets.innerHTML = '';
+  aiLoading.style.display = '';
+  msgEl.textContent = '';
+}
+
 function showCelebrate(mode, cost, variance, points, extra = {}) {
   const overlay = document.getElementById('celebrate');
   document.getElementById('celFinal').textContent = fmtK(cost);
@@ -2253,6 +2442,9 @@ function showCelebrate(mode, cost, variance, points, extra = {}) {
     issuesContainer.style.display = 'none';
   }
 
+  let fallbackNarrative = '';
+  let runAi = true;
+
   if (mode === 'win') {
     const band = bandFromPoints(points);
     const emojiByBand = {
@@ -2269,25 +2461,40 @@ function showCelebrate(mode, cost, variance, points, extra = {}) {
       poor: ['Approved on math only.', 'Technically approved.']
     };
     document.getElementById('celTitle').textContent = PICK(titleByBand[band]);
-    document.getElementById('celMsg').textContent = buildNarrative(points, allIssues, cost, state.current);
+    fallbackNarrative = buildNarrative(points, allIssues, cost, state.current);
     document.getElementById('celNext').style.display = state.current < PROJECTS.length - 1 ? '' : 'none';
     if (state.current === PROJECTS.length - 1 && state.solved.every(Boolean)) {
       document.getElementById('celEmoji').textContent = '🏆';
       document.getElementById('celTitle').textContent = 'All eight engagements approved.';
-      document.getElementById('celMsg').textContent = `Final score: ${state.totalScore} of 800. Every engagement priced to deliver for the client and protect team economics. Strong work.`;
+      fallbackNarrative = `Final score: ${state.totalScore} of 800. Every engagement priced to deliver for the client and protect team economics. Strong work.`;
+      runAi = false;
     }
     if (band === 'excellent' || band === 'good') launchConfetti();
   } else if (mode === 'coverage') {
     document.getElementById('celEmoji').textContent = '🤔';
     document.getElementById('celTitle').textContent = 'Coverage gap';
-    document.getElementById('celMsg').textContent = `The budget envelope works, but only ${extra.deliverablesWithHours} of ${extra.total} deliverables are staffed. The client expects the team to be resourced across the full scope of work — plan staffing for at least ${extra.minRequired} workstreams.`;
+    fallbackNarrative = `The budget envelope works, but only ${extra.deliverablesWithHours} of ${extra.total} deliverables are staffed. The client expects the team to be resourced across the full scope of work — plan staffing for at least ${extra.minRequired} workstreams.`;
     document.getElementById('celNext').style.display = 'none';
   } else {
     document.getElementById('celEmoji').textContent = '🎯';
     document.getElementById('celTitle').textContent = 'Scope needs adjustment';
-    document.getElementById('celMsg').textContent = 'Your fee position is outside the client\'s budget envelope. Revisit the staffing mix — consider where senior leverage adds value and where you can flex to mid-level talent.';
+    fallbackNarrative = 'Your fee position is outside the client\'s budget envelope. Revisit the staffing mix — consider where senior leverage adds value and where you can flex to mid-level talent.';
     document.getElementById('celNext').style.display = 'none';
   }
+
+  if (runAi) {
+    showAiLoading();
+    const myToken = ++celebrateToken;
+    const payload = buildAiPayload(state.current, cost, variance, points, allIssues);
+    requestAiFeedback(payload).then(result => {
+      if (myToken !== celebrateToken) return;
+      renderAiFeedback(result, fallbackNarrative);
+    });
+  } else {
+    document.getElementById('celAi').style.display = 'none';
+    document.getElementById('celMsg').textContent = fallbackNarrative;
+  }
+
   overlay.classList.add('show');
   renderPicker();
   document.getElementById('scoreText').textContent = state.totalScore;
