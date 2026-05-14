@@ -127,7 +127,7 @@
   /* ===== PROJECT PICKER ===== */
   .picker {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(7, 1fr);
     gap: 8px;
     margin-bottom: 22px;
   }
@@ -1257,14 +1257,14 @@
       <div class="brand-mark">S</div>
       <div>
         <h1>Scoping Room</h1>
-        <div class="sub">Healthcare consulting · 8 engagements to scope</div>
+        <div class="sub">Healthcare consulting · 7 engagements to scope</div>
       </div>
     </div>
     <div class="header-right">
       <div class="score-pill">
         <span class="star">★</span>
         <strong id="scoreText">0</strong>
-        <span class="total">/ 800</span>
+        <span class="total">/ 700</span>
       </div>
       <button class="help-btn" id="helpBtn" title="Show instructions">?</button>
     </div>
@@ -1330,7 +1330,7 @@
   <div class="welcome-card">
     <div class="welcome-emoji">👋</div>
     <h2>Welcome, Associates & Senior Associates!</h2>
-    <p class="intro">You've been engaged on <strong>eight healthcare consulting projects</strong>, each with its own scope, deliverables, and budget envelope. Your task: build a staffing plan that delivers for the client while preserving margin for the team.</p>
+    <p class="intro">You've been engaged on <strong>seven healthcare consulting projects</strong>, each with its own scope, deliverables, and budget envelope. Your task: build a staffing plan that delivers for the client while preserving margin for the team.</p>
 
     <div class="welcome-steps">
       <div class="welcome-step">
@@ -1351,7 +1351,7 @@
       </div>
       <div class="welcome-step">
         <div class="welcome-step-num">5</div>
-        <div class="welcome-step-body"><strong>Submit for approval.</strong> Land within the tolerance band with appropriate coverage across deliverables to get the scope approved. Each engagement scores 60–100 points based on precision — a perfect run is 800.</div>
+        <div class="welcome-step-body"><strong>Submit for approval.</strong> Land within the tolerance band with appropriate coverage across deliverables to get the scope approved. Each engagement scores 60–100 points based on precision — a perfect run is 700.</div>
       </div>
     </div>
 
@@ -1601,30 +1601,6 @@ const PROJECTS = [
                 { group: 'manager', minHrs: 108, severity: 'expected', reason: 'comms execution is Manager-owned' }] },
       { name: 'Day-100 plan & transition', note: 'Stabilization plan, Year-1 roadmap, handoff to permanent team', hrsRange: [100, 164],
         rules: [{ group: 'partner_director', minHrs: 72, severity: 'expected', reason: 'stabilization plan and transition is project lead work' }] }
-    ]
-  },
-  // ============================================================
-  // P-08: Distressed Turnaround (5 deliverables — crisis engagement)
-  // ============================================================
-  {
-    code: 'P-08', name: 'Distressed Turnaround', type: 'turnaround',
-    diff: 4, budget: 385000, tol: 0.03, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
-    desc: 'Twelve-month full operational and financial turnaround for a distressed health system. Liquidity management, labor restructuring, service line rationalization, payer renegotiation, and lender relations — embedded leadership across the engagement.',
-    deliverables: [
-      { name: 'CRO leadership & crisis PMO', note: 'Chief Restructuring Officer role + war-room operations across the engagement', hrsRange: [390, 550],
-        rules: [{ group: 'partner_director', minHrs: 320, severity: 'critical', reason: 'CRO role must be a Partner or Managing Director — the entire engagement hinges on this leadership' },
-                { group: 'manager', minHrs: 80, severity: 'expected', reason: 'crisis PMO needs sustained Manager-level coverage to run war-room operations' }] },
-      { name: 'Cash, lender & vendor management', note: '13-week cash forecast, lender/bondholder negotiations, AP/vendor concessions', hrsRange: [200, 310],
-        rules: [{ group: 'partner_director', minHrs: 90, severity: 'critical', reason: 'lender/bondholder negotiations and daily cash decisions in a distressed entity are Partner/MD work — no exceptions' },
-                { group: 'manager', minHrs: 40, severity: 'expected', reason: 'cash forecast execution and vendor management is Manager-led' }] },
-      { name: 'Labor & service line restructuring', note: 'RIFs, org redesign, service line closure, productivity flexing', hrsRange: [210, 310],
-        rules: [{ group: 'partner_director', minHrs: 80, severity: 'critical', reason: 'RIF planning and service line closure carry significant legal/political risk — senior leadership ownership required' },
-                { group: 'manager', minHrs: 60, severity: 'expected', reason: 'daily flexing and execution is Manager work' }] },
-      { name: 'Revenue, payer & 340B optimization', note: 'Top-5 payer renegotiation, AR cleanup, 340B compliance, real estate monetization', hrsRange: [185, 285],
-        rules: [{ group: 'partner_director', minHrs: 65, severity: 'critical', reason: 'payer negotiations and real estate decisions must be led by Partner/MD/Sr. Director' },
-                { group: 'manager', minHrs: 35, severity: 'expected', reason: 'AR cleanup and 340B operational work is Manager-led' }] },
-      { name: 'Board reporting & permanent transition', note: 'Monthly board meetings, operating model redesign, leadership recruitment, handoff', hrsRange: [200, 300],
-        rules: [{ group: 'partner_director', minHrs: 75, severity: 'critical', reason: 'board reporting in a distressed engagement must be Partner/MD-led; transition documentation needs senior ownership' }] }
     ]
   }
 ];
@@ -2467,8 +2443,8 @@ function showCelebrate(mode, cost, variance, points, extra = {}) {
     document.getElementById('celNext').style.display = state.current < PROJECTS.length - 1 ? '' : 'none';
     if (state.current === PROJECTS.length - 1 && state.solved.every(Boolean)) {
       document.getElementById('celEmoji').textContent = '🏆';
-      document.getElementById('celTitle').textContent = 'All eight engagements approved.';
-      fallbackNarrative = `Final score: ${state.totalScore} of 800. Every engagement priced to deliver for the client and protect team economics. Strong work.`;
+      document.getElementById('celTitle').textContent = 'All seven engagements approved.';
+      fallbackNarrative = `Final score: ${state.totalScore} of 700. Every engagement priced to deliver for the client and protect team economics. Strong work.`;
       runAi = false;
     }
     if (band === 'excellent' || band === 'good') launchConfetti();
