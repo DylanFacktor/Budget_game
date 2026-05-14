@@ -803,6 +803,80 @@
   }
   .range-badge.under-range::before { content: '⌖'; }
 
+  /* Inline gap panel — shown inside a deliverable when the last Test Scope
+     flagged issues there. Lets the player see exactly what to fix without
+     leaving the deliverable. */
+  .inline-issues {
+    border-radius: var(--r-sm);
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    border-left: 3px solid var(--warn);
+    background: var(--warn-soft);
+  }
+  .inline-issues.critical {
+    border-left-color: var(--bad);
+    background: var(--bad-soft);
+  }
+  .inline-issues.nice-to-have {
+    border-left-color: var(--ink-3);
+    background: var(--surface-2);
+  }
+  .inline-issues-head {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-2);
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+  .inline-issues-stale {
+    font-size: 9px;
+    color: var(--ink-3);
+    text-transform: none;
+    letter-spacing: 0;
+    font-weight: 600;
+    font-style: italic;
+  }
+  .inline-issues ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .inline-issues li {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--ink-2);
+    padding-left: 18px;
+    position: relative;
+  }
+  .inline-issues li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 5px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--warn);
+  }
+  .inline-issues li.critical::before { background: var(--bad); }
+  .inline-issues li.nice-to-have::before { background: var(--ink-3); }
+  .inline-issues li strong { color: var(--ink); font-weight: 700; }
+  .inline-issues-gap {
+    margin-left: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--bad);
+  }
+
   /* Informational specialty chips on each deliverable. No scoring impact —
      just point the player at what kind of work the deliverable is. */
   .specialty-chips-row {
@@ -1818,8 +1892,13 @@ function hrsRangeFor(deliverable, projIdx) {
   const mult = effBudgetMult(projIdx);
   return [Math.round(deliverable.hrsRange[0] * mult), Math.round(deliverable.hrsRange[1] * mult)];
 }
+// Global leniency factor applied to all rule thresholds. The raw minHrs
+// values are written as "ideal" targets; the evaluator multiplies them
+// down so the puzzle is about tier PRESENCE plus rate math, not hitting
+// exact hour targets.
+const RULE_LENIENCY = 0.5;
 function ruleMinHrsFor(rule, projIdx) {
-  return Math.max(1, Math.round(rule.minHrs * effBudgetMult(projIdx)));
+  return Math.max(1, Math.round(rule.minHrs * effBudgetMult(projIdx) * RULE_LENIENCY));
 }
 function hasStaffedHours(projIdx) {
   return state.hours[projIdx].some(delH => ROLES.some(r => (delH[r.id] || 0) > 0));
@@ -2067,6 +2146,7 @@ function renderFocus() {
     <div class="focus-desc">${d.note}</div>
     ${specialtyChips(d)}
     ${hint ? `<div class="tier-hint">${hint}</div>` : ''}
+    ${inlineDeliverableIssues(state.focusDel)}
     <div class="focus-stats">
       <div class="focus-stat"><div class="l">Hours</div><div class="v">${calc.hrs}</div></div>
       <div class="focus-stat"><div class="l">Fees</div><div class="v">${fmt(calc.cost)}</div></div>
@@ -2287,8 +2367,10 @@ function evaluateRules(projIdx) {
   return issues;
 }
 
-// Severity weights for scoring penalties
-const SEVERITY_PENALTY = { critical: 12, expected: 5, 'nice-to-have': 2 };
+// Severity weights for scoring penalties. Softened so a flagged issue
+// is a nudge, not a heavy deduction — the puzzle is mainly the rate
+// math and team mix, with staffing rules as guardrails.
+const SEVERITY_PENALTY = { critical: 6, expected: 3, 'nice-to-have': 1 };
 
 // Soft tier-framing hints. Point the player at what kind of staffing the
 // deliverable is testing, without naming exact roles or hour thresholds —
@@ -2320,6 +2402,32 @@ function specialtyChips(deliverable) {
   return `<div class="specialty-chips-row">${deliverable.specialties.map(s =>
     `<span class="specialty-chip">${SPECIALTY_LABELS[s] || s}</span>`
   ).join('')}</div>`;
+}
+
+// Inline gap panel for the focus main view. Reads from state.lastTest
+// and shows the specific shortfalls for the current deliverable so the
+// player can adjust without leaving the screen.
+function inlineDeliverableIssues(delIdx) {
+  if (!state.lastTest || state.lastTest.projIdx !== state.current) return '';
+  const issues = state.lastTest.issues.filter(i => i.delIdx === delIdx);
+  if (issues.length === 0) return '';
+  const sevRank = { critical: 0, expected: 1, 'nice-to-have': 2 };
+  const topSev = issues.reduce(
+    (acc, i) => sevRank[i.severity] < sevRank[acc] ? i.severity : acc,
+    'nice-to-have'
+  );
+  const staleNote = state.testDirty
+    ? '<span class="inline-issues-stale">edits made — re-test to refresh</span>'
+    : '';
+  const items = issues.map(iss => {
+    const tier = (iss.groupLabel || '').split('(')[0].trim();
+    const gap = Math.max(0, iss.minHrs - iss.actualHrs);
+    return `<li class="${iss.severity}"><strong>${tier}</strong>: need ≥${iss.minHrs}h, currently ${iss.actualHrs}h${gap > 0 ? `<span class="inline-issues-gap">+${gap}h</span>` : ''}</li>`;
+  }).join('');
+  return `<div class="inline-issues ${topSev}">
+    <div class="inline-issues-head"><span>From your last Test Scope</span>${staleNote}</div>
+    <ul>${items}</ul>
+  </div>`;
 }
 
 // Returns a soft hint sentence for a deliverable. Picks tiers with critical
