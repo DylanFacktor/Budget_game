@@ -1519,34 +1519,26 @@
   <div class="welcome-card">
     <div class="welcome-emoji">👋</div>
     <h2>Welcome to the Scoping Room</h2>
-    <p class="intro">You've been engaged on <strong>eight healthcare consulting projects</strong>, each with its own scope, deliverables, and budget envelope. Your task: build a staffing plan that delivers for the client while preserving margin for the team.</p>
+    <p class="intro">Eight healthcare consulting engagements. Allocate hours by role to hit each one's budget with a sensible team mix.</p>
 
     <div class="welcome-steps">
       <div class="welcome-step">
         <div class="welcome-step-num">1</div>
-        <div class="welcome-step-body"><strong>Select an engagement.</strong> Start with P-01 or work through them in any order. The dots indicate engagement complexity — from quick assessments to multi-workstream transformations.</div>
+        <div class="welcome-step-body"><strong>Pick an engagement</strong> from the cards above.</div>
       </div>
       <div class="welcome-step">
         <div class="welcome-step-num">2</div>
-        <div class="welcome-step-body"><strong>Review the engagement brief.</strong> Each project lays out the client situation, target budget, tolerance band, and the deliverables the team has committed to.</div>
+        <div class="welcome-step-body"><strong>Add hours by role</strong> for each deliverable. Watch the budget bar at the top.</div>
       </div>
       <div class="welcome-step">
         <div class="welcome-step-num">3</div>
-        <div class="welcome-step-body"><strong>Build your staffing plan.</strong> Assign hours by role for each deliverable. Each engagement has a <strong>team size cap</strong> — once you commit to a role anywhere on the engagement, it joins your team. When the cap is reached, other roles lock out until you free a slot by dropping someone to zero. Italic tier hints point at the staffing puzzle for each deliverable.</div>
-      </div>
-      <div class="welcome-step">
-        <div class="welcome-step-num">4</div>
-        <div class="welcome-step-body"><strong>Track your fee position</strong> on the budget bar at the top. Green means you're aligned with the client's budget envelope, yellow signals exposure, red means the engagement isn't priced right yet. The <strong>Easy/Standard/Hard toggle</strong> in the header lets you change the challenge per engagement — Hard tightens budget, tolerance, and team size; Easy loosens all three. Clear the staffing plan to switch difficulty mid-engagement.</div>
-      </div>
-      <div class="welcome-step">
-        <div class="welcome-step-num">5</div>
-        <div class="welcome-step-body"><strong>Submit for approval.</strong> Land within the tolerance band with appropriate coverage across deliverables to get the scope approved. Each engagement scores 60–100 points based on precision — a perfect run is 800.</div>
+        <div class="welcome-step-body"><strong>Test Scope</strong> checks your work without penalty. <strong>Submit</strong> locks in your score.</div>
       </div>
     </div>
 
     <div class="welcome-tip">
       <span class="tip-emoji">💡</span>
-      <div><strong>Use Test Scope to check your work without penalty.</strong> Run a dry check anytime to see which workstreams have staffing concerns. Submit for approval is your final scored attempt.</div>
+      <div>Each engagement has a <strong>team-size cap</strong> — once your slots are full, other roles grey out until you free one. Use <strong>Easy/Standard/Hard</strong> in the header to change difficulty.</div>
     </div>
 
     <div class="welcome-actions">
@@ -1629,7 +1621,7 @@ const PROJECTS = [
   {
     code: 'P-01', name: 'Medicare Enrollment', type: 'compliance',
     diff: 1, budget: 6000, tol: 0.05, easyBudget: 7000, hardBudget: 5000,
-    teamSize: 3, rolesAvailable: ['dir', 'srassoc', 'assoc'],
+    teamSize: 3, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
     desc: 'Help a multispecialty clinic complete CMS Medicare enrollment for a new service line. Tight, focused engagement: provider enrollment forms (CMS-855), Medicare Conditions of Participation review, state-level coordination, and the submission packet.',
     deliverables: [
       { name: 'Project Management', note: 'Kickoff, status, doc tracking, internal coordination', hrsRange: [3, 6],
