@@ -1541,7 +1541,7 @@
       </div>
       <div class="welcome-step">
         <div class="welcome-step-num">4</div>
-        <div class="welcome-step-body"><strong>After Submit</strong>, your plan gets scored and a short partner review shows what worked and what to sharpen.</div>
+        <div class="welcome-step-body"><strong>After Submit</strong>, your plan gets scored and short AI feedback shows what worked and what to sharpen.</div>
       </div>
     </div>
 
@@ -1570,7 +1570,7 @@
       <ul id="celIssuesList"></ul>
     </div>
     <div class="celebrate-ai" id="celAi" style="display:none;">
-      <div class="celebrate-ai-head" id="celAiHead">Partner review</div>
+      <div class="celebrate-ai-head" id="celAiHead">AI feedback</div>
       <div class="celebrate-ai-headline" id="celAiHeadline"></div>
       <ul id="celAiBullets"></ul>
       <div class="celebrate-ai-loading-text" id="celAiLoading" style="display:none;">Reviewing scope</div>
@@ -2884,7 +2884,7 @@ function renderAiFeedback(result, fallbackText) {
   if (result) {
     aiEl.classList.remove('loading');
     aiEl.style.display = '';
-    aiHead.textContent = 'Partner review';
+    aiHead.textContent = 'AI feedback';
     aiHeadline.textContent = result.headline;
     aiBullets.innerHTML = result.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join('');
     aiLoading.style.display = 'none';
@@ -2904,7 +2904,7 @@ function showAiLoading() {
   const msgEl = document.getElementById('celMsg');
   aiEl.style.display = '';
   aiEl.classList.add('loading');
-  aiHead.textContent = 'Partner review';
+  aiHead.textContent = 'AI feedback';
   aiHeadline.textContent = '';
   aiBullets.innerHTML = '';
   aiLoading.style.display = '';
