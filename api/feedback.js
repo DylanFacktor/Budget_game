@@ -37,7 +37,12 @@ function buildUserMessage(payload) {
 
   const issueLines = issues.length === 0
     ? '(no rule issues flagged)'
-    : issues.map(i => `- ${i.deliverable} [${i.severity}]: missing ${i.missing}, gap of ${i.gap}h`).join('\n');
+    : issues.map(i => {
+        if (i.kind === 'over') {
+          return `- ${i.deliverable} [${i.severity}, over-staffed]: ${i.excessHrs}h of ${i.tier} on this deliverable when the cap is ${i.capHrs}h — ${i.reason || 'wrong tier for this work'}`;
+        }
+        return `- ${i.deliverable} [${i.severity}]: missing ${i.missing || i.tier}, gap of ${i.gap}h — ${i.reason || ''}`;
+      }).join('\n');
 
   const teamLine = engagement.teamSize
     ? `Team size cap: ${engagement.teamSize} distinct roles (associate used ${engagement.teamUsed})`
