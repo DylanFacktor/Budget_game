@@ -37,10 +37,14 @@ function buildUserMessage(payload) {
   const teamLine = engagement.teamSize
     ? `Team size cap: ${engagement.teamSize} distinct roles (associate used ${engagement.teamUsed})`
     : '';
+  const diffLine = engagement.difficulty && engagement.difficulty !== 'standard'
+    ? `Difficulty: ${engagement.difficulty} (budget, ranges, tolerance, and team cap have already been scaled to reflect this)`
+    : '';
 
   return `ENGAGEMENT: ${engagement.name} (${engagement.type})
-Budget: $${engagement.budget.toLocaleString()} (tolerance plus/minus ${(engagement.tolerance * 100).toFixed(0)}%)
+Budget: $${engagement.budget.toLocaleString()} (tolerance plus/minus ${(engagement.tolerance * 100).toFixed(1)}%)
 ${teamLine}
+${diffLine}
 Brief: ${engagement.brief}
 
 STAFFING PLAN:
