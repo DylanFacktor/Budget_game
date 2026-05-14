@@ -21,13 +21,15 @@ Rules:
 - Do not just restate the rule issues — translate them into improvement language.
 - If the plan scored 90+, bullets can be 2-3 entries and acknowledge what's working, but include at least one refinement.
 - Never use exclamation marks or marketing speak.
-- If the associate used the full team-size cap or close to it, comment on team coherence — real engagements run with a tight committed team, not a different role on every deliverable.`;
+- If the associate used the full team-size cap or close to it, comment on team coherence — real engagements run with a tight committed team, not a different role on every deliverable.
+- When deliverables list specialties (Finance, Compliance, Clinical, etc.), the staffing plan should reflect people with those backgrounds. We don't track individual specialties yet, so comment aspirationally — phrases like 'you'd want a finance-leaning Director here' or 'the OSV chapters need clinical, finance, and compliance specialists rather than generalists.'`;
 
 function buildUserMessage(payload) {
   const { engagement, deliverables, issues, outcome } = payload;
   const staffingLines = deliverables.map(d => {
     const staff = d.staffing.map(s => `${s.role}: ${s.hrs}h`).join(', ');
-    return `- ${d.name} (${d.hrsTotal}h, $${d.cost.toLocaleString()})\n    ${staff || '(unstaffed)'}`;
+    const spec = (d.specialties && d.specialties.length) ? ` [specialties: ${d.specialties.join(', ')}]` : '';
+    return `- ${d.name}${spec} (${d.hrsTotal}h, $${d.cost.toLocaleString()})\n    ${staff || '(unstaffed)'}`;
   }).join('\n');
 
   const issueLines = issues.length === 0
