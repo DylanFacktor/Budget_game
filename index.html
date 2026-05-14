@@ -1421,7 +1421,7 @@
 <div class="welcome-overlay" id="welcome">
   <div class="welcome-card">
     <div class="welcome-emoji">👋</div>
-    <h2>Welcome, Associates & Senior Associates!</h2>
+    <h2>Welcome to the Scoping Room</h2>
     <p class="intro">You've been engaged on <strong>eight healthcare consulting projects</strong>, each with its own scope, deliverables, and budget envelope. Your task: build a staffing plan that delivers for the client while preserving margin for the team.</p>
 
     <div class="welcome-steps">
@@ -1530,7 +1530,7 @@ const PROJECTS = [
   // (execution). teamSize 3 — all three tiers should be on the team.
   // ============================================================
   {
-    code: 'P-00', name: 'Medicare Enrollment', type: 'compliance',
+    code: 'P-01', name: 'Medicare Enrollment', type: 'compliance',
     diff: 1, budget: 6000, tol: 0.05, easyBudget: 7000, hardBudget: 5000,
     teamSize: 3, rolesAvailable: ['dir', 'srassoc', 'assoc'],
     desc: 'Help a multispecialty clinic complete CMS Medicare enrollment for a new service line. Tight, focused engagement: provider enrollment forms (CMS-855), Medicare Conditions of Participation review, state-level coordination, and the submission packet.',
@@ -1549,7 +1549,7 @@ const PROJECTS = [
   // P-01: HRSA OSV Prep — INTACT (the 21-chapter structure IS the point)
   // ============================================================
   {
-    code: 'P-01', name: 'HRSA OSV Prep', type: 'compliance',
+    code: 'P-02', name: 'HRSA OSV Prep', type: 'compliance',
     diff: 1, budget: 28000, tol: 0.07, teamSize: 5, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
     desc: 'Mock Operational Site Visit readiness review for a Federally Qualified Health Center. Three-day on-site assessment across the HRSA Compliance Manual\'s 21 chapters, mirroring the Site Visit Protocol\'s three review tracks: Fiscal, Clinical, and Administrative/Governance.',
     deliverables: [
@@ -1581,7 +1581,7 @@ const PROJECTS = [
   // P-02: RCM Quick Assessment (5 deliverables)
   // ============================================================
   {
-    code: 'P-02', name: 'Revenue Cycle Quick Assessment', type: 'diagnostic',
+    code: 'P-03', name: 'Revenue Cycle Quick Assessment', type: 'diagnostic',
     diff: 1, budget: 42000, tol: 0.06, teamSize: 3, rolesAvailable: ['srmgr', 'mgr', 'srassoc', 'assoc'],
     desc: 'Three-week diagnostic of revenue cycle performance for a 250-bed community hospital. Benchmark KPIs, identify denial drivers, and quantify recovery opportunity.',
     deliverables: [
@@ -1602,7 +1602,7 @@ const PROJECTS = [
   // P-03: Healthcare HR Transformation (smaller scope, 5 deliverables)
   // ============================================================
   {
-    code: 'P-03', name: 'Healthcare HR Transformation', type: 'transform',
+    code: 'P-04', name: 'Healthcare HR Transformation', type: 'transform',
     diff: 2, budget: 78000, tol: 0.05, teamSize: 5, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
     desc: 'Targeted HR transformation for a mid-size health system. Org design refresh, total rewards review, talent acquisition optimization, and HRIS roadmap. Smaller scope than enterprise HR work but covers the same workstream categories.',
     deliverables: [
@@ -1626,7 +1626,7 @@ const PROJECTS = [
   // P-04: BI Ledger Build (5 deliverables — automated payment ledger build engagement)
   // ============================================================
   {
-    code: 'P-04', name: 'BI Ledger Build', type: 'data',
+    code: 'P-05', name: 'BI Ledger Build', type: 'data',
     diff: 2, budget: 145000, tol: 0.04, teamSize: 4, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
     desc: 'Build an automated payment ledger and BI reporting solution for a mid-size health system. Replace manual workflows with validated, automated data capture and reporting tied to existing financial systems. Includes staff training and job aid development for sustainability.',
     deliverables: [
@@ -1650,7 +1650,7 @@ const PROJECTS = [
   // P-05: CalAIM ECM Implementation (5 deliverables — California Medi-Cal Enhanced Care Management)
   // ============================================================
   {
-    code: 'P-05', name: 'CalAIM ECM Implementation', type: 'transform',
+    code: 'P-06', name: 'CalAIM ECM Implementation', type: 'transform',
     diff: 3, budget: 180000, tol: 0.04, teamSize: 5, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
     desc: 'Multi-month implementation of CalAIM Enhanced Care Management (ECM) program for a California Medi-Cal provider. Build out templates, workflows, referral processes, reporting, and a sustainability plan to operationalize ECM at scale.',
     deliverables: [
@@ -1674,7 +1674,7 @@ const PROJECTS = [
   // P-06: Interim CFO (5 deliverables — collapses the 6-month duties)
   // ============================================================
   {
-    code: 'P-06', name: 'Interim CFO Engagement', type: 'interim',
+    code: 'P-07', name: 'Interim CFO Engagement', type: 'interim',
     diff: 3, budget: 260000, tol: 0.03, teamSize: 4, rolesAvailable: ['partner', 'md', 'srdir', 'srmgr', 'mgr', 'srassoc'],
     desc: 'Six-month interim CFO placement at a regional health system mid-turnaround. Lead finance function, monthly close, banking relationships, and board reporting while permanent CFO search is underway.',
     deliverables: [
@@ -1699,7 +1699,7 @@ const PROJECTS = [
   // P-07: M&A Integration (5 deliverables)
   // ============================================================
   {
-    code: 'P-07', name: 'M&A Integration', type: 'transform',
+    code: 'P-08', name: 'M&A Integration', type: 'transform',
     diff: 4, budget: 385000, tol: 0.03, teamSize: 6, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
     desc: 'Nine-month post-merger integration of two regional systems creating a $3B combined entity. Integration Management Office across multiple workstreams with a $120M synergy target.',
     deliverables: [
