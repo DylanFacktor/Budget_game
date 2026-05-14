@@ -266,6 +266,11 @@
     border-left: 2px dashed rgba(255,255,255,0.5);
     border-right: 2px dashed rgba(255,255,255,0.5);
   }
+  .hud-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
   .hud-submit {
     background: var(--p2);
     color: white;
@@ -280,6 +285,31 @@
   }
   .hud-submit:hover {
     background: #ea580c;
+  }
+  .hud-test {
+    background: transparent;
+    color: rgba(255,255,255,0.85);
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 6px 14px;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s;
+    border-radius: var(--r-sm);
+  }
+  .hud-test:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.5);
+    color: white;
+  }
+  .hud-test.has-issues {
+    border-color: rgba(252,165,165,0.6);
+    color: #fca5a5;
+  }
+  .hud-test.is-clean {
+    border-color: rgba(110,231,183,0.6);
+    color: #6ee7b7;
   }
 
   /* ===== COMPACT BRIEF ===== */
@@ -508,6 +538,9 @@
     font-size: 13px;
     font-weight: 600;
     line-height: 1.3;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
   .focus-side-hrs {
     font-size: 11px;
@@ -516,6 +549,15 @@
     font-family: 'JetBrains Mono', monospace;
   }
   .focus-side-item.active .focus-side-hrs { color: var(--p1); }
+  .focus-side-issue {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .focus-side-issue.critical { background: var(--bad); }
+  .focus-side-issue.expected { background: var(--warn); }
+  .focus-side-issue.nice-to-have { background: var(--ink-3); }
 
   .focus-main {
     background: var(--surface);
@@ -713,35 +755,26 @@
   }
   .range-badge.under-range::before { content: '⌖'; }
 
-  /* Critical-rule hint badge — shown inline on deliverables with critical role requirements */
-  .crit-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: 2px 8px;
-    border-radius: var(--r-full);
-    background: var(--bad-soft);
-    color: var(--bad);
-    margin-left: 8px;
-    vertical-align: middle;
-    line-height: 1.4;
-  }
-  .crit-badge::before {
-    content: '●';
-    font-size: 8px;
-    line-height: 1;
-  }
-  .crit-badges-row {
+  /* Soft per-deliverable tier hint — points at the staffing puzzle without naming exact roles */
+  .tier-hint {
     margin-top: 6px;
+    margin-bottom: 14px;
+    font-size: 12.5px;
+    color: var(--ink-2);
+    font-style: italic;
+    line-height: 1.45;
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
+    align-items: flex-start;
+    gap: 6px;
   }
-  .crit-badges-row .crit-badge { margin-left: 0; }
+  .tier-hint::before {
+    content: '◇';
+    font-style: normal;
+    color: var(--p1);
+    font-size: 12px;
+    margin-top: 1px;
+    flex-shrink: 0;
+  }
   .focus-role.disabled {
     opacity: 0.35;
     cursor: not-allowed;
@@ -1003,11 +1036,15 @@
     margin-bottom: 12px;
   }
   .celebrate-msg {
-    font-size: 14px;
-    color: var(--ink-2);
+    font-size: 13px;
+    color: var(--ink-3);
     line-height: 1.5;
-    margin-bottom: 22px;
+    margin: 4px 0 22px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+    font-style: italic;
   }
+  .celebrate-msg:empty { display: none; }
   .celebrate-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -1119,14 +1156,14 @@
       gap: 14px;
     }
     .hud-bar-wrap { grid-column: span 3; }
-    .hud-submit { grid-column: span 3; }
+    .hud-actions { grid-column: span 3; flex-direction: row; }
   }
   @media (max-width: 700px) {
     .picker { grid-template-columns: repeat(2, 1fr); }
     .focus-roles { grid-template-columns: 1fr; }
     .hud { grid-template-columns: 1fr 1fr; }
     .hud-bar-wrap { grid-column: span 2; }
-    .hud-submit { grid-column: span 2; }
+    .hud-actions { grid-column: span 2; flex-direction: row; }
   }
   @media (max-width: 480px) {
     .picker { grid-template-columns: 1fr; }
@@ -1179,7 +1216,10 @@
       <div class="lbl">VARIANCE</div>
       <div class="val" id="deltaVal">—</div>
     </div>
-    <button class="hud-submit" id="submitBtn">Submit →</button>
+    <div class="hud-actions">
+      <button class="hud-test" id="testBtn">Test scope</button>
+      <button class="hud-submit" id="submitBtn">Submit →</button>
+    </div>
   </div>
 
   <div class="brief-compact">
@@ -1254,7 +1294,6 @@
   <div class="celebrate-card">
     <div class="celebrate-emoji" id="celEmoji">🎉</div>
     <h2 id="celTitle">Scope approved!</h2>
-    <p class="celebrate-msg" id="celMsg"></p>
     <div class="celebrate-stats">
       <div class="celebrate-stat"><div class="l">Final fees</div><div class="v" id="celFinal">$0</div></div>
       <div class="celebrate-stat"><div class="l">Position</div><div class="v" id="celVar">0%</div></div>
@@ -1264,6 +1303,7 @@
       <div class="celebrate-issues-head" id="celIssuesHead">Staffing observations</div>
       <ul id="celIssuesList"></ul>
     </div>
+    <p class="celebrate-msg" id="celMsg"></p>
     <div class="celebrate-actions">
       <button class="btn" id="celRetry">Revise scope</button>
       <button class="btn primary" id="celNext">Next engagement →</button>
@@ -1513,7 +1553,9 @@ const state = {
   hours: PROJECTS.map(p => p.deliverables.map(() => Object.fromEntries(ROLES.map(r => [r.id, 0])))),
   solved: PROJECTS.map(() => false),
   bestScore: PROJECTS.map(() => 0),
-  totalScore: 0
+  totalScore: 0,
+  lastTest: null,
+  testDirty: false
 };
 
 const fmt = n => '$' + Math.round(n).toLocaleString();
@@ -1546,6 +1588,10 @@ function calcProject(projIdx) {
 
 function setHours(delIdx, roleId, value) {
   state.hours[state.current][delIdx][roleId] = Math.max(0, value);
+  if (state.lastTest && state.lastTest.projIdx === state.current && !state.testDirty) {
+    state.testDirty = true;
+    updateTestBtn();
+  }
 }
 
 function renderPicker() {
@@ -1616,17 +1662,24 @@ function renderBrief() {
 function renderFocus() {
   const p = PROJECTS[state.current];
   const sb = document.getElementById('focusSidebar');
+  const testMarkers = (state.lastTest && state.lastTest.projIdx === state.current)
+    ? state.lastTest.byDeliverable
+    : {};
   sb.innerHTML = `
     <div class="focus-side-head">Workstream Plan</div>
     ${p.deliverables.map((d, i) => {
       const calc = calcDeliverable(state.current, i);
       const isActive = i === state.focusDel;
       const isStaffed = calc.hrs > 0;
+      const marker = testMarkers[i];
+      const markerHtml = marker
+        ? `<span class="focus-side-issue ${marker}" title="Staffing concern flagged"></span>`
+        : '';
       return `
         <div class="focus-side-item ${isActive ? 'active' : ''} ${isStaffed ? 'staffed' : ''}" data-del="${i}">
           <div class="focus-side-bullet">${isStaffed ? '✓' : (i+1)}</div>
           <div style="flex:1; min-width: 0;">
-            <div class="focus-side-name">${d.name}</div>
+            <div class="focus-side-name">${d.name}${markerHtml}</div>
             ${isStaffed ? `<div class="focus-side-hrs">${calc.hrs} hrs · ${fmt(calc.cost)}</div>` : ''}
           </div>
         </div>
@@ -1643,6 +1696,7 @@ function renderFocus() {
   const d = p.deliverables[state.focusDel];
   const calc = calcDeliverable(state.current, state.focusDel);
   const main = document.getElementById('focusMain');
+  const hint = tierHint(d);
   main.innerHTML = `
     <div class="focus-nav">
       <div class="focus-nav-info">Deliverable ${state.focusDel + 1} of ${p.deliverables.length}</div>
@@ -1653,11 +1707,7 @@ function renderFocus() {
     </div>
     <div class="focus-title">${d.name}${hrsRangeBadge(d, calc.hrs)}</div>
     <div class="focus-desc">${d.note}</div>
-    ${(() => {
-      const hints = criticalHints(d);
-      if (hints.length === 0) return '';
-      return `<div class="crit-badges-row" style="margin-bottom:18px;">${hints.map(h => `<span class="crit-badge">${h.label}</span>`).join('')}</div>`;
-    })()}
+    ${hint ? `<div class="tier-hint">${hint}</div>` : ''}
     <div class="focus-stats">
       <div class="focus-stat"><div class="l">Hours</div><div class="v">${calc.hrs}</div></div>
       <div class="focus-stat"><div class="l">Fees</div><div class="v">${fmt(calc.cost)}</div></div>
@@ -1807,6 +1857,7 @@ function renderAll() {
   renderBrief();
   renderFocus();
   renderBudget();
+  updateTestBtn();
 }
 
 // ===== SUBMIT / CELEBRATE =====
@@ -1847,20 +1898,30 @@ function evaluateRules(projIdx) {
 // Severity weights for scoring penalties
 const SEVERITY_PENALTY = { critical: 12, expected: 5, 'nice-to-have': 2 };
 
-// Short label for critical-rule hints shown inline (before submission)
-const CRIT_HINT_LABEL = {
-  partner_director: 'Partner–Director required',
-  manager:          'Manager required',
-  associate:        'Associate-level work'
+// Soft tier-framing hints. Point the player at what kind of staffing the
+// deliverable is testing, without naming exact roles or hour thresholds —
+// the puzzle is for the player to solve.
+const TIER_HINT_BY_GROUP = {
+  partner_director: 'Senior leadership presence expected',
+  manager:          'Manager-level ownership expected',
+  associate:        'Analyst-heavy execution work'
 };
 
-// Returns array of {group, label} for all CRITICAL rules on a deliverable.
-// Used for inline hint badges so players know which deliverables matter most.
-function criticalHints(deliverable) {
-  if (!deliverable.rules) return [];
-  return deliverable.rules
+// Returns a soft hint sentence for a deliverable. Picks tiers with critical
+// rules, dedupes by group, and joins multiple tiers with a bullet.
+function tierHint(deliverable) {
+  if (!deliverable.rules) return '';
+  const seen = new Set();
+  const phrases = [];
+  deliverable.rules
     .filter(r => r.severity === 'critical')
-    .map(r => ({ group: r.group, label: CRIT_HINT_LABEL[r.group] || r.group }));
+    .forEach(r => {
+      if (seen.has(r.group)) return;
+      seen.add(r.group);
+      const p = TIER_HINT_BY_GROUP[r.group];
+      if (p) phrases.push(p);
+    });
+  return phrases.join(' · ');
 }
 
 // Returns HTML for the recommended-hours badge for a deliverable.
@@ -1883,6 +1944,55 @@ function hrsRangeBadge(deliverable, actualHrs) {
     }
   }
   return `<span class="range-badge ${stateClass}">${label}</span>`;
+}
+
+// =============================================================
+// TEST SCOPE (dry-run)
+// Runs staffing-rule evaluation without locking in a score. Stashes
+// the most-severe issue per deliverable so the sidebar can show
+// markers pointing the player at which workstreams need a second look.
+// =============================================================
+const SEV_RANK = { critical: 0, expected: 1, 'nice-to-have': 2 };
+
+function testScope() {
+  const projIdx = state.current;
+  const { hrs } = calcProject(projIdx);
+  if (hrs === 0) return;
+  const issues = evaluateRules(projIdx);
+  const byDeliverable = {};
+  issues.forEach(iss => {
+    const cur = byDeliverable[iss.delIdx];
+    if (!cur || SEV_RANK[iss.severity] < SEV_RANK[cur]) {
+      byDeliverable[iss.delIdx] = iss.severity;
+    }
+  });
+  state.lastTest = { projIdx, byDeliverable, issues };
+  state.testDirty = false;
+  renderFocus();
+  updateTestBtn();
+}
+
+function updateTestBtn() {
+  const btn = document.getElementById('testBtn');
+  if (!btn) return;
+  btn.classList.remove('has-issues', 'is-clean', 'is-stale');
+  if (!state.lastTest || state.lastTest.projIdx !== state.current) {
+    btn.textContent = 'Test scope';
+    return;
+  }
+  if (state.testDirty) {
+    btn.classList.add('is-stale');
+    btn.textContent = 'Re-test scope';
+    return;
+  }
+  const n = state.lastTest.issues.length;
+  if (n === 0) {
+    btn.classList.add('is-clean');
+    btn.textContent = '✓ No issues flagged';
+  } else {
+    btn.classList.add('has-issues');
+    btn.textContent = `${n} ${n === 1 ? 'issue' : 'issues'} · re-test`;
+  }
 }
 
 function submit() {
@@ -2120,19 +2230,23 @@ function showCelebrate(mode, cost, variance, points, extra = {}) {
     return sev[a.severity] - sev[b.severity];
   });
   if (allIssues.length > 0) {
-    issuesList.innerHTML = allIssues.slice(0, 6).map(iss => {
+    issuesList.innerHTML = allIssues.slice(0, 8).map(iss => {
       const sevClass = iss.severity === 'critical' ? 'critical' : (iss.severity === 'expected' ? 'expected' : 'nice');
       const sevLabel = iss.severity === 'critical' ? 'Critical' : (iss.severity === 'expected' ? 'Expected' : 'Nice to have');
-      return `<li class="${sevClass}"><strong>${iss.deliverable}:</strong> needs ${iss.groupLabel} (≥${iss.minHrs} hrs). ${iss.reason}. <em style="opacity:0.7;">[${sevLabel}]</em></li>`;
+      const shortGap = `needs ≥${iss.minHrs} hrs from ${iss.groupLabel.split('(')[0].trim()}, currently ${iss.actualHrs}`;
+      return `<li class="${sevClass}"><strong>${iss.deliverable}</strong> · ${sevLabel}<br>${shortGap}. <span style="opacity:0.75;">${iss.reason}.</span></li>`;
     }).join('');
     const counts = {
       critical: allIssues.filter(i => i.severity === 'critical').length,
-      expected: allIssues.filter(i => i.severity === 'expected').length
+      expected: allIssues.filter(i => i.severity === 'expected').length,
+      nice: allIssues.filter(i => i.severity === 'nice-to-have').length
     };
-    let headLabel = 'Staffing observations';
-    if (counts.critical > 0) headLabel = `${counts.critical} critical · ${counts.expected} expected · staffing observations`;
-    else if (counts.expected > 0) headLabel = `${counts.expected} observations on staffing mix`;
-    if (allIssues.length > 6) headLabel += ` (showing 6 of ${allIssues.length})`;
+    const parts = [];
+    if (counts.critical) parts.push(`${counts.critical} critical`);
+    if (counts.expected) parts.push(`${counts.expected} expected`);
+    if (counts.nice) parts.push(`${counts.nice} nice-to-have`);
+    let headLabel = parts.length ? `Where the staffing plan slipped — ${parts.join(' · ')}` : 'Staffing observations';
+    if (allIssues.length > 8) headLabel += ` (showing 8 of ${allIssues.length})`;
     issuesHead.textContent = headLabel;
     issuesContainer.style.display = '';
   } else {
@@ -2196,11 +2310,15 @@ function launchConfetti() {
 
 // ===== EVENTS =====
 document.getElementById('submitBtn').addEventListener('click', submit);
+document.getElementById('testBtn').addEventListener('click', testScope);
 document.getElementById('resetBtn').addEventListener('click', () => {
   const p = PROJECTS[state.current];
   state.hours[state.current] = p.deliverables.map(() => Object.fromEntries(ROLES.map(r => [r.id, 0])));
+  state.lastTest = null;
+  state.testDirty = false;
   renderFocus();
   renderBudget();
+  updateTestBtn();
 });
 document.getElementById('celRetry').addEventListener('click', () => {
   document.getElementById('celebrate').classList.remove('show');
