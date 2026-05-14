@@ -987,11 +987,11 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     display: none;
-    align-items: center;
     justify-content: center;
     z-index: 200;
     animation: fadeIn 0.3s ease;
     padding: 20px;
+    overflow-y: auto;
   }
   .celebrate-overlay.show { display: flex; }
   @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
@@ -999,12 +999,14 @@
     background: var(--surface);
     padding: 36px 40px;
     max-width: 480px;
+    width: 100%;
     text-align: center;
     border-radius: var(--r-xl);
     box-shadow: var(--shadow-lg);
     animation: pop 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
+    margin: auto;
   }
   .celebrate-card::before {
     content: '';
