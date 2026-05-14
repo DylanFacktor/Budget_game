@@ -20,7 +20,8 @@ Rules:
 - Bullets must reference SPECIFIC deliverables and tiers from the plan.
 - Do not just restate the rule issues — translate them into improvement language.
 - If the plan scored 90+, bullets can be 2-3 entries and acknowledge what's working, but include at least one refinement.
-- Never use exclamation marks or marketing speak.`;
+- Never use exclamation marks or marketing speak.
+- If the associate used the full team-size cap or close to it, comment on team coherence — real engagements run with a tight committed team, not a different role on every deliverable.`;
 
 function buildUserMessage(payload) {
   const { engagement, deliverables, issues, outcome } = payload;
@@ -33,8 +34,13 @@ function buildUserMessage(payload) {
     ? '(no rule issues flagged)'
     : issues.map(i => `- ${i.deliverable} [${i.severity}]: missing ${i.missing}, gap of ${i.gap}h`).join('\n');
 
+  const teamLine = engagement.teamSize
+    ? `Team size cap: ${engagement.teamSize} distinct roles (associate used ${engagement.teamUsed})`
+    : '';
+
   return `ENGAGEMENT: ${engagement.name} (${engagement.type})
 Budget: $${engagement.budget.toLocaleString()} (tolerance plus/minus ${(engagement.tolerance * 100).toFixed(0)}%)
+${teamLine}
 Brief: ${engagement.brief}
 
 STAFFING PLAN:

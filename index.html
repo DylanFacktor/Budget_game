@@ -782,6 +782,45 @@
     border-color: var(--line);
   }
   .focus-role.disabled .focus-role-name { text-decoration: line-through; }
+  /* Team-cap lockout — visually distinct from engagement-level lock.
+     Dashed border signals 'role is available, but team is full.'
+     Reduce a staffed role to 0 anywhere to free the slot. */
+  .focus-role.team-locked {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background: var(--surface-2);
+    border-style: dashed;
+    border-color: var(--line-2);
+  }
+  .focus-role.team-locked .focus-role-name { text-decoration: line-through; }
+  .focus-role.team-locked .stepper { pointer-events: none; }
+
+  /* Team-size bar shown above the role inputs */
+  .focus-team-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--surface-2);
+    padding: 8px 12px;
+    border-radius: var(--r-sm);
+    border-left: 3px solid var(--p1);
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: var(--ink-2);
+  }
+  .focus-team-bar.at-cap {
+    border-left-color: var(--warn);
+    background: var(--warn-soft);
+    color: var(--ink);
+  }
+  .focus-team-bar strong { font-weight: 700; }
+  .focus-team-cap-flag {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--warn);
+  }
   .role-availability-note {
     display: flex;
     align-items: center;
@@ -1343,7 +1382,7 @@
       </div>
       <div class="welcome-step">
         <div class="welcome-step-num">3</div>
-        <div class="welcome-step-body"><strong>Build your staffing plan.</strong> Assign hours by role for each deliverable. Watch for red <strong>staffing requirement badges</strong> — these flag deliverables where senior leadership or specialist roles are non-negotiable. Other workstreams have expected role mixes that affect your score on submission.</div>
+        <div class="welcome-step-body"><strong>Build your staffing plan.</strong> Assign hours by role for each deliverable. Each engagement has a <strong>team size cap</strong> — once you commit to a role anywhere on the engagement, it joins your team. When the cap is reached, other roles lock out until you free a slot by dropping someone to zero. Italic tier hints point at the staffing puzzle for each deliverable.</div>
       </div>
       <div class="welcome-step">
         <div class="welcome-step-num">4</div>
@@ -1435,7 +1474,7 @@ const PROJECTS = [
   // ============================================================
   {
     code: 'P-01', name: 'HRSA OSV Prep', type: 'compliance',
-    diff: 1, budget: 28000, tol: 0.07, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
+    diff: 1, budget: 28000, tol: 0.07, teamSize: 5, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
     desc: 'Mock Operational Site Visit readiness review for a Federally Qualified Health Center. Three-day on-site assessment across the HRSA Compliance Manual\'s 21 chapters, mirroring the Site Visit Protocol\'s three review tracks: Fiscal, Clinical, and Administrative/Governance.',
     deliverables: [
       { name: 'Project Management', note: 'Kickoff, weekly status, doc requests, scheduling', hrsRange: [10, 18],
@@ -1467,7 +1506,7 @@ const PROJECTS = [
   // ============================================================
   {
     code: 'P-02', name: 'Revenue Cycle Quick Assessment', type: 'diagnostic',
-    diff: 1, budget: 42000, tol: 0.06, rolesAvailable: ['srmgr', 'mgr', 'srassoc', 'assoc'],
+    diff: 1, budget: 42000, tol: 0.06, teamSize: 3, rolesAvailable: ['srmgr', 'mgr', 'srassoc', 'assoc'],
     desc: 'Three-week diagnostic of revenue cycle performance for a 250-bed community hospital. Benchmark KPIs, identify denial drivers, and quantify recovery opportunity.',
     deliverables: [
       { name: 'Project Management & data request', note: 'Kickoff, stakeholder mgmt, EHR + claims data extracts', hrsRange: [38, 54],
@@ -1489,7 +1528,7 @@ const PROJECTS = [
   // ============================================================
   {
     code: 'P-03', name: 'Healthcare HR Transformation', type: 'transform',
-    diff: 2, budget: 78000, tol: 0.05, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
+    diff: 2, budget: 78000, tol: 0.05, teamSize: 5, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
     desc: 'Targeted HR transformation for a mid-size health system. Org design refresh, total rewards review, talent acquisition optimization, and HRIS roadmap. Smaller scope than enterprise HR work but covers the same workstream categories.',
     deliverables: [
       { name: 'Project Management & change governance', note: 'PMO, steering committee, communications, change network', hrsRange: [44, 64],
@@ -1514,7 +1553,7 @@ const PROJECTS = [
   // ============================================================
   {
     code: 'P-04', name: 'BI Ledger Build', type: 'transform',
-    diff: 2, budget: 145000, tol: 0.04, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
+    diff: 2, budget: 145000, tol: 0.04, teamSize: 4, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
     desc: 'Build an automated payment ledger and BI reporting solution for a mid-size health system. Replace manual workflows with validated, automated data capture and reporting tied to existing financial systems. Includes staff training and job aid development for sustainability.',
     deliverables: [
       { name: 'Project Management and weekly workgroup', note: 'PMO, weekly workgroup cadence, status, stakeholder mgmt', hrsRange: [80, 120],
@@ -1538,7 +1577,7 @@ const PROJECTS = [
   // ============================================================
   {
     code: 'P-05', name: 'CalAIM ECM Implementation', type: 'transform',
-    diff: 3, budget: 180000, tol: 0.04, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
+    diff: 3, budget: 180000, tol: 0.04, teamSize: 5, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
     desc: 'Multi-month implementation of CalAIM Enhanced Care Management (ECM) program for a California Medi-Cal provider. Build out templates, workflows, referral processes, reporting, and a sustainability plan to operationalize ECM at scale.',
     deliverables: [
       { name: 'Program Management & Coordination', note: 'PMO setup, weekly workgroup, stakeholder coordination, status reporting', hrsRange: [105, 155],
@@ -1563,7 +1602,7 @@ const PROJECTS = [
   // ============================================================
   {
     code: 'P-06', name: 'Interim CFO Engagement', type: 'interim',
-    diff: 3, budget: 260000, tol: 0.03, rolesAvailable: ['partner', 'md', 'srdir', 'srmgr', 'mgr', 'srassoc'],
+    diff: 3, budget: 260000, tol: 0.03, teamSize: 4, rolesAvailable: ['partner', 'md', 'srdir', 'srmgr', 'mgr', 'srassoc'],
     desc: 'Six-month interim CFO placement at a regional health system mid-turnaround. Lead finance function, monthly close, banking relationships, and board reporting while permanent CFO search is underway.',
     deliverables: [
       { name: 'Embedded interim CFO leadership', note: 'Full-time CFO role + finance team management, 6 months on-site', hrsRange: [404, 496],
@@ -1586,7 +1625,7 @@ const PROJECTS = [
   // ============================================================
   {
     code: 'P-07', name: 'M&A Integration', type: 'transform',
-    diff: 4, budget: 385000, tol: 0.03, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
+    diff: 4, budget: 385000, tol: 0.03, teamSize: 6, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
     desc: 'Nine-month post-merger integration of two regional systems creating a $3B combined entity. Integration Management Office across multiple workstreams with a $120M synergy target.',
     deliverables: [
       { name: 'IMO leadership & Day-1 readiness', note: 'IMO governance, decision rights, legal close, comms, IT cutover', hrsRange: [272, 408],
@@ -1644,12 +1683,94 @@ function calcProject(projIdx) {
   return { cost, hrs };
 }
 
+// =============================================================
+// TEAM-SIZE CAP
+// Real engagements commit to a small team that carries the work across
+// every deliverable. The teamSize on each project caps the number of
+// distinct roles a player can have staffed at once. Roles in the team
+// stay editable; roles outside the team get locked out when the cap
+// is reached. Dropping a role to 0 across the whole engagement frees
+// the slot back up.
+// =============================================================
+function usedRolesSet(projIdx) {
+  const used = new Set();
+  state.hours[projIdx].forEach(delHours => {
+    ROLES.forEach(r => {
+      if ((delHours[r.id] || 0) > 0) used.add(r.id);
+    });
+  });
+  return used;
+}
+
+function teamSizeFor(projIdx) {
+  return PROJECTS[projIdx].teamSize || ROLES.length;
+}
+
+function isRoleAtTeamCap(projIdx, roleId) {
+  const used = usedRolesSet(projIdx);
+  if (used.has(roleId)) return false;
+  return used.size >= teamSizeFor(projIdx);
+}
+
+// Partial-update for team bar + role-row lock states, called after every
+// setHours so the focused input is preserved (no full re-render).
+function updateTeamLockStates() {
+  const projIdx = state.current;
+  const used = usedRolesSet(projIdx);
+  const cap = teamSizeFor(projIdx);
+  const atCap = used.size >= cap;
+
+  const bar = document.querySelector('.focus-team-bar');
+  if (bar) {
+    bar.classList.toggle('at-cap', atCap);
+    const countEl = bar.querySelector('strong');
+    if (countEl) countEl.textContent = used.size;
+    const existingFlag = bar.querySelector('.focus-team-cap-flag');
+    if (atCap && !existingFlag) {
+      const flag = document.createElement('span');
+      flag.className = 'focus-team-cap-flag';
+      flag.textContent = 'Team full';
+      bar.appendChild(flag);
+    } else if (!atCap && existingFlag) {
+      existingFlag.remove();
+    }
+  }
+
+  document.querySelectorAll('.focus-role[data-role]').forEach(row => {
+    const roleId = row.dataset.role;
+    const role = ROLES.find(r => r.id === roleId);
+    if (!role) return;
+    const available = isRoleAvailable(projIdx, roleId);
+    const teamLocked = available && atCap && !used.has(roleId);
+    row.classList.toggle('team-locked', teamLocked);
+    const lockOut = !available || teamLocked;
+    row.querySelectorAll('.stepper button, .stepper input').forEach(el => {
+      el.disabled = lockOut;
+    });
+    const rateEl = row.querySelector('.focus-role-rate');
+    if (rateEl) {
+      rateEl.textContent = !available ? 'locked' : (teamLocked ? 'team full' : '$' + role.rate + '/hr');
+    }
+    row.setAttribute('title', !available
+      ? 'Not available on this engagement'
+      : (teamLocked ? 'Team is full. Reduce a staffed role to 0 to free this slot.' : ''));
+  });
+}
+
 function setHours(delIdx, roleId, value) {
-  state.hours[state.current][delIdx][roleId] = Math.max(0, value);
+  const newValue = Math.max(0, value);
+  if (newValue > 0) {
+    const used = usedRolesSet(state.current);
+    if (!used.has(roleId) && used.size >= teamSizeFor(state.current)) {
+      return;
+    }
+  }
+  state.hours[state.current][delIdx][roleId] = newValue;
   if (state.lastTest && state.lastTest.projIdx === state.current && !state.testDirty) {
     state.testDirty = true;
     updateTestBtn();
   }
+  updateTeamLockStates();
 }
 
 function renderPicker() {
@@ -1771,16 +1892,34 @@ function renderFocus() {
       <div class="focus-stat"><div class="l">Fees</div><div class="v">${fmt(calc.cost)}</div></div>
       <div class="focus-stat"><div class="l">Blended rate</div><div class="v">${calc.hrs > 0 ? '$' + Math.round(calc.cost/calc.hrs) : '—'}</div></div>
     </div>
+    <div class="focus-team-bar ${(() => {
+      const u = usedRolesSet(state.current).size;
+      const cap = teamSizeFor(state.current);
+      return u >= cap ? 'at-cap' : '';
+    })()}">
+      <span>Team: <strong>${usedRolesSet(state.current).size}</strong> of ${teamSizeFor(state.current)} staffed</span>
+      ${(() => {
+        const u = usedRolesSet(state.current).size;
+        const cap = teamSizeFor(state.current);
+        return u >= cap ? `<span class="focus-team-cap-flag">Team full</span>` : '';
+      })()}
+    </div>
     <div class="focus-roles">
       ${ROLES.map(r => {
         const hrs = state.hours[state.current][state.focusDel][r.id] || 0;
         const available = isRoleAvailable(state.current, r.id);
-        const disabledAttr = available ? '' : 'disabled';
+        const teamLocked = available && isRoleAtTeamCap(state.current, r.id);
+        const interactionDisabled = !available || teamLocked;
+        const disabledAttr = interactionDisabled ? 'disabled' : '';
+        const rateText = !available ? 'locked' : (teamLocked ? 'team full' : '$' + r.rate + '/hr');
+        const tooltip = !available
+          ? 'Not available on this engagement'
+          : (teamLocked ? 'Team is full. Reduce a staffed role to 0 to free this slot.' : '');
         return `
-          <div class="focus-role ${hrs > 0 ? 'staffed' : ''} ${available ? '' : 'disabled'}" title="${available ? '' : 'Not available on this engagement'}">
+          <div class="focus-role ${hrs > 0 ? 'staffed' : ''} ${!available ? 'disabled' : ''} ${teamLocked ? 'team-locked' : ''}" data-role="${r.id}" title="${tooltip}">
             <div style="flex:1;">
               <div class="focus-role-name">${r.name}</div>
-              <div class="focus-role-rate">${available ? '$' + r.rate + '/hr' : 'locked'}</div>
+              <div class="focus-role-rate">${rateText}</div>
             </div>
             <div class="stepper">
               <button data-role="${r.id}" data-delta="-1" ${disabledAttr}>−</button>
@@ -2084,7 +2223,9 @@ function buildAiPayload(projIdx, cost, variance, points, issues) {
       type: (PROJECT_TYPES[p.type] || {}).label || p.type,
       brief: p.desc,
       budget: p.budget,
-      tolerance: p.tol
+      tolerance: p.tol,
+      teamSize: teamSizeFor(projIdx),
+      teamUsed: usedRolesSet(projIdx).size
     },
     deliverables,
     issues: issues.map(i => ({
