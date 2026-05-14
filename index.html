@@ -1523,21 +1523,25 @@ const PROJECT_TYPES = {
 
 const PROJECTS = [
   // ============================================================
-  // P-00: Executive Memo — entry-level tight-scope teaching engagement
-  // Only Director + Associate available; teamSize 2 forces both tiers.
-  // Calibrated for ~22.5% Director / 77.5% Associate hour split.
+  // P-00: Medicare Enrollment — small-budget compliance engagement.
+  // Explicit difficulty band: $7K Easy / $6K Standard / $5K Hard.
+  // Roles: Director (compliance oversight) + Sr. Associate / Associate
+  // (execution). teamSize 3 — all three tiers should be on the team.
   // ============================================================
   {
-    code: 'P-00', name: 'Executive Memo', type: 'diagnostic',
-    diff: 1, budget: 5000, tol: 0.05, teamSize: 2, rolesAvailable: ['dir', 'assoc'],
-    desc: 'A two-day advisory engagement: draft a Director-signed executive memo for a CFO weighing a service-line investment. Tight budget, tight scope — the kind of quick-turn work that lives or dies on the right senior-plus-analyst pairing.',
+    code: 'P-00', name: 'Medicare Enrollment', type: 'compliance',
+    diff: 1, budget: 6000, tol: 0.05, easyBudget: 7000, hardBudget: 5000,
+    teamSize: 3, rolesAvailable: ['dir', 'srassoc', 'assoc'],
+    desc: 'Help a multispecialty clinic complete CMS Medicare enrollment for a new service line. Tight, focused engagement: provider enrollment forms (CMS-855), Medicare Conditions of Participation review, state-level coordination, and the submission packet.',
     deliverables: [
-      { name: 'Advisory call + memo draft', note: 'Director-led discovery call, frame the recommendation, Associate-drafted memo', hrsRange: [12, 22],
-        rules: [{ group: 'partner_director', minHrs: 3, severity: 'critical', reason: 'the memo carries Director signoff for client credibility — without senior framing it is a junior opinion' },
-                { group: 'associate', minHrs: 8, severity: 'expected', reason: 'memo drafting and research is analyst execution — Director should not be doing the writing' }] },
-      { name: 'Memo finalization + delivery', note: 'Director review, Associate edits, send to CFO', hrsRange: [6, 12],
-        rules: [{ group: 'partner_director', minHrs: 2, severity: 'critical', reason: 'Director must review before the memo goes to the CFO — final sign-off is non-negotiable' },
-                { group: 'associate', minHrs: 4, severity: 'expected', reason: 'edits and delivery logistics are Associate work' }] }
+      { name: 'Project Management', note: 'Kickoff, status, doc tracking, internal coordination', hrsRange: [3, 6],
+        rules: [{ group: 'associate', minHrs: 3, severity: 'expected', reason: 'PM coordination, scheduling, and doc tracking is analyst execution work — Associates or Sr. Associates run the PM workstream' }] },
+      { name: 'Provider enrollment forms (CMS-855)', note: 'Form prep, attestations, NPI/PECOS coordination, supporting docs', hrsRange: [8, 14],
+        rules: [{ group: 'associate', minHrs: 6, severity: 'expected', reason: 'CMS-855 form prep and documentation is heavy analyst execution work' }] },
+      { name: 'Compliance review & enrollment strategy', note: 'Medicare Conditions of Participation review, risk flagging, strategic guidance', hrsRange: [4, 8],
+        rules: [{ group: 'partner_director', minHrs: 3, severity: 'critical', reason: 'Medicare compliance review and enrollment strategy must be Director-led — regulatory risk and CoP interpretation need senior judgment' }] },
+      { name: 'Submission packet & state coordination', note: 'Final packet assembly, fiscal intermediary submission, state Medicaid coordination', hrsRange: [4, 8],
+        rules: [{ group: 'associate', minHrs: 3, severity: 'expected', reason: 'packet assembly and submission logistics are Associate-level execution' }] }
     ]
   },
   // ============================================================
@@ -1549,7 +1553,7 @@ const PROJECTS = [
     desc: 'Mock Operational Site Visit readiness review for a Federally Qualified Health Center. Three-day on-site assessment across the HRSA Compliance Manual\'s 21 chapters, mirroring the Site Visit Protocol\'s three review tracks: Fiscal, Clinical, and Administrative/Governance.',
     deliverables: [
       { name: 'Project Management', note: 'Kickoff, weekly status, doc requests, scheduling', hrsRange: [10, 18],
-        rules: [{ group: 'manager', minHrs: 8, severity: 'expected', reason: 'project coordination is a PMO function — Manager or Sr. Manager owns logistics' }] },
+        rules: [{ group: 'associate', minHrs: 8, severity: 'expected', reason: 'PM coordination, scheduling, and doc tracking is analyst execution work — Associates or Sr. Associates run the PM workstream' }] },
       { name: 'Pre-visit document review', note: 'Form 5A, policies, Board minutes, financials', hrsRange: [12, 20],
         rules: [{ group: 'associate', minHrs: 10, severity: 'expected', reason: 'document review is associate-level work — not appropriate for senior staffing' },
                 { group: 'manager', minHrs: 2, severity: 'nice-to-have', reason: 'a Manager should QC findings before they go upstream' }] },
@@ -1581,8 +1585,7 @@ const PROJECTS = [
     desc: 'Three-week diagnostic of revenue cycle performance for a 250-bed community hospital. Benchmark KPIs, identify denial drivers, and quantify recovery opportunity.',
     deliverables: [
       { name: 'Project Management & data request', note: 'Kickoff, stakeholder mgmt, EHR + claims data extracts', hrsRange: [38, 54],
-        rules: [{ group: 'manager', minHrs: 16, severity: 'expected', reason: 'coordination needs PMO ownership' },
-                { group: 'associate', minHrs: 16, severity: 'expected', reason: 'data extraction is analyst execution work' }] },
+        rules: [{ group: 'associate', minHrs: 28, severity: 'expected', reason: 'PM coordination AND data extraction are both analyst-tier execution — Associates and Sr. Associates run this workstream' }] },
       { name: 'KPI benchmarking & denials analysis', note: 'Days in AR, denial rate vs. peers, root-cause drivers', hrsRange: [50, 74],
         rules: [{ group: 'associate', minHrs: 28, severity: 'expected', reason: 'benchmarking and root-cause analysis is analyst-heavy' },
                 { group: 'manager', minHrs: 8, severity: 'expected', reason: 'a Manager should own benchmark methodology and findings' }] },
@@ -1603,8 +1606,7 @@ const PROJECTS = [
     desc: 'Targeted HR transformation for a mid-size health system. Org design refresh, total rewards review, talent acquisition optimization, and HRIS roadmap. Smaller scope than enterprise HR work but covers the same workstream categories.',
     deliverables: [
       { name: 'Project Management & change governance', note: 'PMO, steering committee, communications, change network', hrsRange: [44, 64],
-        rules: [{ group: 'partner_director', minHrs: 8, severity: 'critical', reason: 'HR transformation needs executive sponsorship — Partner/Director-level governance is non-negotiable for senior HR stakeholders' },
-                { group: 'manager', minHrs: 18, severity: 'expected', reason: 'sustained PMO and change management coordination is Manager-led work' }] },
+        rules: [{ group: 'associate', minHrs: 22, severity: 'expected', reason: 'PMO coordination, communications execution, and change-network logistics are analyst-tier work — Associates and Sr. Associates run this workstream' }] },
       { name: 'Workforce planning & org design', note: 'Span of control analysis, layer optimization, role rationalization', hrsRange: [72, 104],
         rules: [{ group: 'partner_director', minHrs: 12, severity: 'critical', reason: 'org design recommendations touch every leader — must be Partner/Director-led for credibility and political navigation' },
                 { group: 'associate', minHrs: 24, severity: 'expected', reason: 'span of control and headcount analysis is Associate-level analytical work' }] },
@@ -1628,7 +1630,7 @@ const PROJECTS = [
     desc: 'Build an automated payment ledger and BI reporting solution for a mid-size health system. Replace manual workflows with validated, automated data capture and reporting tied to existing financial systems. Includes staff training and job aid development for sustainability.',
     deliverables: [
       { name: 'Project Management and weekly workgroup', note: 'PMO, weekly workgroup cadence, status, stakeholder mgmt', hrsRange: [80, 120],
-        rules: [{ group: 'manager', minHrs: 40, severity: 'expected', reason: 'sustained PMO and workgroup facilitation is Manager-led work' }] },
+        rules: [{ group: 'associate', minHrs: 50, severity: 'expected', reason: 'sustained PMO coordination and workgroup logistics are analyst-tier execution work — Associates and Sr. Associates run this workstream' }] },
       { name: 'Current State Assessment and Project Planning', note: 'Workflow inventory, system mapping, gap analysis, build roadmap', hrsRange: [100, 150],
         rules: [{ group: 'manager', minHrs: 30, severity: 'critical', reason: 'current state assessment shapes the entire build — must be Manager-led for accountability' },
                 { group: 'associate', minHrs: 40, severity: 'expected', reason: 'workflow documentation and system inventory is analyst execution' }] },
@@ -1652,8 +1654,7 @@ const PROJECTS = [
     desc: 'Multi-month implementation of CalAIM Enhanced Care Management (ECM) program for a California Medi-Cal provider. Build out templates, workflows, referral processes, reporting, and a sustainability plan to operationalize ECM at scale.',
     deliverables: [
       { name: 'Program Management & Coordination', note: 'PMO setup, weekly workgroup, stakeholder coordination, status reporting', hrsRange: [105, 155],
-        rules: [{ group: 'manager', minHrs: 40, severity: 'critical', reason: 'multi-month program with multiple workstreams requires sustained Manager-level PMO ownership' },
-                { group: 'partner_director', minHrs: 10, severity: 'expected', reason: 'executive sponsorship and steering presence anchors program credibility with the client' }] },
+        rules: [{ group: 'associate', minHrs: 60, severity: 'expected', reason: 'sustained PMO setup, workgroup logistics, and status reporting are analyst-tier execution work — Associates and Sr. Associates run this workstream' }] },
       { name: 'Development and implementation of new ECM templates and workflows', note: 'Care management templates, intake workflows, documentation standards, EHR build', hrsRange: [135, 205],
         rules: [{ group: 'manager', minHrs: 35, severity: 'critical', reason: 'template and workflow design is core operational work — must be Manager-led with clinical/operational expertise' },
                 { group: 'associate', minHrs: 70, severity: 'expected', reason: 'template build and workflow documentation is analyst execution' }] },
@@ -1739,19 +1740,32 @@ const state = {
 function diffFor(projIdx) {
   return DIFFICULTY[state.difficultyByProject[projIdx]] || DIFFICULTY.standard;
 }
+// effBudgetMult returns the active multiplier for budget AND hour ranges
+// AND rule thresholds. Single multiplier preserves the calibration:
+// midpoint × blended rate ≈ budget × 1.10 regardless of difficulty.
+// Per-engagement overrides (easyBudget/hardBudget) take precedence over
+// the global DIFFICULTY multipliers when set, so engagements with a
+// non-symmetric difficulty band can express that explicitly.
+function effBudgetMult(projIdx) {
+  const p = PROJECTS[projIdx];
+  const diff = state.difficultyByProject[projIdx];
+  if (diff === 'easy' && typeof p.easyBudget === 'number') return p.easyBudget / p.budget;
+  if (diff === 'hard' && typeof p.hardBudget === 'number') return p.hardBudget / p.budget;
+  return DIFFICULTY[diff].budget;
+}
 function budgetFor(projIdx) {
-  return Math.round(PROJECTS[projIdx].budget * diffFor(projIdx).budget);
+  return Math.round(PROJECTS[projIdx].budget * effBudgetMult(projIdx));
 }
 function toleranceFor(projIdx) {
   return PROJECTS[projIdx].tol * diffFor(projIdx).tol;
 }
 function hrsRangeFor(deliverable, projIdx) {
   if (!deliverable.hrsRange) return null;
-  const mult = diffFor(projIdx).hrsRange;
+  const mult = effBudgetMult(projIdx);
   return [Math.round(deliverable.hrsRange[0] * mult), Math.round(deliverable.hrsRange[1] * mult)];
 }
 function ruleMinHrsFor(rule, projIdx) {
-  return Math.max(1, Math.round(rule.minHrs * diffFor(projIdx).hrsRange));
+  return Math.max(1, Math.round(rule.minHrs * effBudgetMult(projIdx)));
 }
 function hasStaffedHours(projIdx) {
   return state.hours[projIdx].some(delH => ROLES.some(r => (delH[r.id] || 0) > 0));
