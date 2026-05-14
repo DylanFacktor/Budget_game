@@ -869,12 +869,17 @@
   .inline-issues li.critical::before { background: var(--bad); }
   .inline-issues li.nice-to-have::before { background: var(--ink-3); }
   .inline-issues li strong { color: var(--ink); font-weight: 700; }
-  .inline-issues-gap {
-    margin-left: 6px;
-    font-family: 'JetBrains Mono', monospace;
+  .inline-issues-line {
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--ink-2);
+  }
+  .inline-issues-why {
     font-size: 11px;
-    font-weight: 700;
-    color: var(--bad);
+    font-style: italic;
+    color: var(--ink-3);
+    line-height: 1.45;
+    margin-top: 3px;
   }
 
   /* Informational specialty chips on each deliverable. No scoring impact —
@@ -2411,10 +2416,15 @@ function inlineDeliverableIssues(delIdx) {
   const staleNote = state.testDirty
     ? '<span class="inline-issues-stale">edits made — re-test to refresh</span>'
     : '';
+  const hrs = n => `${n} hour${Math.abs(n) === 1 ? '' : 's'}`;
   const items = issues.map(iss => {
     const tier = (iss.groupLabel || '').split('(')[0].trim();
     const gap = Math.max(0, iss.minHrs - iss.actualHrs);
-    return `<li class="${iss.severity}"><strong>${tier}</strong>: need ≥${iss.minHrs}h, currently ${iss.actualHrs}h${gap > 0 ? `<span class="inline-issues-gap">+${gap}h</span>` : ''}</li>`;
+    const lineText = iss.actualHrs === 0
+      ? `Add about <strong>${hrs(gap)} of ${tier}</strong> work.`
+      : `Add about <strong>${hrs(gap)} more of ${tier}</strong> work (currently ${hrs(iss.actualHrs)}).`;
+    const why = iss.reason ? `<div class="inline-issues-why">${iss.reason}.</div>` : '';
+    return `<li class="${iss.severity}"><div class="inline-issues-line">${lineText}</div>${why}</li>`;
   }).join('');
   return `<div class="inline-issues ${topSev}">
     <div class="inline-issues-head"><span>From your last Test Scope</span>${staleNote}</div>
