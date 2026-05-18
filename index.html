@@ -2475,13 +2475,15 @@ function inlineDeliverableIssues(delIdx) {
 }
 
 // Returns a soft hint sentence for a deliverable. Picks tiers with critical
-// rules, dedupes by group, and joins multiple tiers with a bullet.
+// MINIMUM-hours rules (the "this tier is required" rules), dedupes by group,
+// and joins multiple tiers with a bullet. Skips maxHrs-only rules — those
+// say a tier is forbidden, not expected, and shouldn't show up as a hint.
 function tierHint(deliverable) {
   if (!deliverable.rules) return '';
   const seen = new Set();
   const phrases = [];
   deliverable.rules
-    .filter(r => r.severity === 'critical')
+    .filter(r => r.severity === 'critical' && typeof r.minHrs === 'number')
     .forEach(r => {
       if (seen.has(r.group)) return;
       seen.add(r.group);
