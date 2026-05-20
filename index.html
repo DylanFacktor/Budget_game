@@ -1436,9 +1436,57 @@
   }
 
   .view-focus { display: grid; }
+  /* Password gate */
+  #gate {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  #gate.hidden { display: none; }
+  .gate-card {
+    background: white; border: 1px solid var(--border);
+    border-radius: 16px; padding: 36px 32px; width: 100%; max-width: 360px;
+    box-shadow: var(--shadow-lg); text-align: center;
+  }
+  .gate-mark {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--ink); color: white;
+    font-size: 20px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 20px;
+  }
+  .gate-card h2 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+  .gate-card p { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .gate-input {
+    width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 10px 14px; font-size: 14px; outline: none;
+    font-family: inherit; margin-bottom: 10px; transition: border-color 0.15s;
+  }
+  .gate-input:focus { border-color: var(--ink); }
+  .gate-input.error { border-color: #e53e3e; }
+  .gate-error { font-size: 12px; color: #e53e3e; margin-bottom: 10px; display: none; }
+  .gate-error.visible { display: block; }
+  .gate-btn {
+    width: 100%; background: var(--ink); color: white;
+    border: none; border-radius: 10px; padding: 11px;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: opacity 0.15s;
+  }
+  .gate-btn:hover { opacity: 0.85; }
 </style>
 </head>
 <body>
+
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-mark">S</div>
+    <h2>Scoping Room</h2>
+    <p>Enter the access code to continue.</p>
+    <input id="gateInput" class="gate-input" type="password" placeholder="Access code" />
+    <div id="gateError" class="gate-error">Incorrect code. Try again.</div>
+    <button class="gate-btn" id="gateBtn">Enter →</button>
+  </div>
+</div>
 
 <div class="wrap">
   <header>
@@ -1584,6 +1632,29 @@
 </div>
 
 <script>
+// Password gate
+(function() {
+  const gate = document.getElementById('gate');
+  const input = document.getElementById('gateInput');
+  const btn = document.getElementById('gateBtn');
+  const err = document.getElementById('gateError');
+  if (sessionStorage.getItem('sr_unlocked') === '1') { gate.classList.add('hidden'); return; }
+  function attempt() {
+    if (input.value.trim().toLowerCase() === 'facktor') {
+      sessionStorage.setItem('sr_unlocked', '1');
+      gate.classList.add('hidden');
+    } else {
+      input.classList.add('error');
+      err.classList.add('visible');
+      input.value = '';
+      input.focus();
+    }
+  }
+  btn.addEventListener('click', attempt);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') attempt(); });
+  input.addEventListener('input', () => { input.classList.remove('error'); err.classList.remove('visible'); });
+})();
+
 const ROLES = [
   { id: 'partner',  name: 'Partner',     rate: 495 },
   { id: 'md',       name: 'Mng Dir',     rate: 465 },
