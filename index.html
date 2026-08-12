@@ -152,7 +152,6 @@
     background: var(--ink);
     color: white;
   }
-  .diff-toggle button.active[data-diff="easy"]    { background: var(--good); }
   .diff-toggle button.active[data-diff="hard"]    { background: var(--bad); }
   .diff-toggle button:disabled {
     opacity: 0.5;
@@ -821,6 +820,26 @@
     border-left-color: var(--ink-3);
     background: var(--surface-2);
   }
+  .test-budget {
+    border-radius: var(--r-sm);
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    border-left: 3px solid var(--p1);
+    background: var(--p1-soft);
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+  .test-budget.stale { opacity: 0.72; }
+  .test-budget-lbl {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--p1-deep);
+    margin-bottom: 4px;
+  }
   .inline-issues-head {
     font-size: 10px;
     font-weight: 700;
@@ -1237,9 +1256,8 @@
   }
   .celebrate-msg:empty { display: none; }
 
-  /* Partner-review AI feedback block. Replaces the templated narrative when
-     the /api/feedback function returns successfully. Templated narrative is
-     the silent fallback if the function errors or times out. */
+  /* Partner-review block on the celebrate modal. Holds the headline +
+     bullets produced locally by buildReview(). */
   .celebrate-ai {
     text-align: left;
     margin-bottom: 18px;
@@ -1499,9 +1517,8 @@
     </div>
     <div class="header-right">
       <div class="diff-toggle" id="diffToggle" role="tablist" aria-label="Difficulty">
-        <button data-diff="easy" title="Easy: looser budget, larger team">Easy</button>
-        <button data-diff="standard" class="active" title="Standard: default settings">Standard</button>
-        <button data-diff="hard" title="Hard: tighter budget, smaller team">Hard</button>
+        <button data-diff="standard" class="active" title="Standard: full bench, hints and hour ranges shown">Standard</button>
+        <button data-diff="hard" title="Hard: limited roles, tighter budget, hints only after Test, no hour ranges">Hard</button>
       </div>
       <div class="score-pill">
         <span class="star">★</span>
@@ -1595,7 +1612,7 @@
 
     <div class="welcome-tip">
       <span class="tip-emoji">💡</span>
-      <div>Each engagement has a <strong>team-size cap</strong> — once your slots are full, other roles grey out until you free one. Use <strong>Easy/Standard/Hard</strong> in the header to change difficulty.</div>
+      <div>Each engagement has a <strong>team-size cap</strong> — once your slots are full, other roles grey out until you free one. Use <strong>Standard/Hard</strong> in the header to change difficulty — Hard limits the roster, hides hints until you Test scope, and drops the hour-range guides.</div>
     </div>
 
     <div class="welcome-actions">
@@ -1618,7 +1635,7 @@
       <ul id="celIssuesList"></ul>
     </div>
     <div class="celebrate-ai" id="celAi" style="display:none;">
-      <div class="celebrate-ai-head" id="celAiHead">AI feedback</div>
+      <div class="celebrate-ai-head" id="celAiHead">Partner review</div>
       <div class="celebrate-ai-headline" id="celAiHeadline"></div>
       <ul id="celAiBullets"></ul>
       <div class="celebrate-ai-loading-text" id="celAiLoading" style="display:none;">Reviewing scope</div>
@@ -1694,13 +1711,13 @@ const PROJECT_TYPES = {
 const PROJECTS = [
   // ============================================================
   // P-00: Medicare Enrollment — small-budget compliance engagement.
-  // Explicit difficulty band: $7K Easy / $6K Standard / $5K Hard.
+  // Explicit difficulty band: $6K Standard / $5K Hard.
   // Roles: Director (compliance oversight) + Sr. Associate / Associate
   // (execution). teamSize 3 — all three tiers should be on the team.
   // ============================================================
   {
     code: 'P-01', name: 'Medicare Enrollment', type: 'compliance',
-    diff: 1, budget: 6000, tol: 0.05, easyBudget: 7000, hardBudget: 5000,
+    diff: 1, budget: 6000, tol: 0.05, hardBudget: 5000,
     teamSize: 3, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
     desc: 'Help a multispecialty clinic complete CMS Medicare enrollment for a new service line. Tight, focused engagement: provider enrollment forms (CMS-855), Medicare Conditions of Participation review, state-level coordination, and the submission packet.',
     deliverables: [
@@ -1928,7 +1945,6 @@ const PROJECTS = [
 // and rule thresholds at render time. Hour ranges and rule thresholds scale
 // by the same factor as the budget so midpoint cost stays ≈ budget × 1.10.
 const DIFFICULTY = {
-  easy:     { budget: 1.10, hrsRange: 1.10, tol: 1.5, teamSizeDelta:  1, label: 'Easy' },
   standard: { budget: 1.00, hrsRange: 1.00, tol: 1.0, teamSizeDelta:  0, label: 'Standard' },
   hard:     { budget: 0.85, hrsRange: 0.85, tol: 0.6, teamSizeDelta: -1, label: 'Hard' }
 };
@@ -1942,7 +1958,10 @@ const state = {
   totalScore: 0,
   lastTest: null,
   testDirty: false,
-  difficultyByProject: PROJECTS.map(() => 'standard')
+  difficultyByProject: PROJECTS.map(() => 'standard'),
+  // Hard mode hides tier hints until the player Tests scope or Submits; this
+  // flips true then. Standard ignores it (hints always shown).
+  revealed: PROJECTS.map(() => false)
 };
 
 function diffFor(projIdx) {
@@ -1951,13 +1970,12 @@ function diffFor(projIdx) {
 // effBudgetMult returns the active multiplier for budget AND hour ranges
 // AND rule thresholds. Single multiplier preserves the calibration:
 // midpoint × blended rate ≈ budget × 1.10 regardless of difficulty.
-// Per-engagement overrides (easyBudget/hardBudget) take precedence over
+// Per-engagement override (hardBudget) takes precedence over
 // the global DIFFICULTY multipliers when set, so engagements with a
 // non-symmetric difficulty band can express that explicitly.
 function effBudgetMult(projIdx) {
   const p = PROJECTS[projIdx];
   const diff = state.difficultyByProject[projIdx];
-  if (diff === 'easy' && typeof p.easyBudget === 'number') return p.easyBudget / p.budget;
   if (diff === 'hard' && typeof p.hardBudget === 'number') return p.hardBudget / p.budget;
   return DIFFICULTY[diff].budget;
 }
@@ -2035,7 +2053,7 @@ function teamSizeFor(projIdx) {
   const p = PROJECTS[projIdx];
   const base = p.teamSize || ROLES.length;
   const adjusted = Math.max(2, base + diffFor(projIdx).teamSizeDelta);
-  const availableCount = (p.rolesAvailable || ROLES.map(r => r.id)).length;
+  const availableCount = availableRolesFor(projIdx).length;
   return Math.min(adjusted, availableCount);
 }
 
@@ -2138,11 +2156,20 @@ function renderPicker() {
   });
 }
 
+// Roles a player may staff on this engagement, by difficulty.
+// Standard opens the full bench (no positions blocked). Hard applies the
+// engagement's designed roster limits (guaranteed rule-satisfiable).
+function availableRolesFor(projIdx) {
+  const all = ROLES.map(r => r.id);
+  if (state.difficultyByProject[projIdx] === 'hard') {
+    return PROJECTS[projIdx].rolesAvailable || all;
+  }
+  return all;
+}
+
 // Returns true if the given role is available on the current project
 function isRoleAvailable(projIdx, roleId) {
-  const p = PROJECTS[projIdx];
-  if (!p.rolesAvailable) return true; // fallback: all available
-  return p.rolesAvailable.includes(roleId);
+  return availableRolesFor(projIdx).includes(roleId);
 }
 
 function renderBrief() {
@@ -2165,7 +2192,7 @@ function renderBrief() {
   // Footer: role availability info, inline and compact
   const footerEl = document.getElementById('briefFooter');
   const allRoleIds = ROLES.map(r => r.id);
-  const available = p.rolesAvailable || allRoleIds;
+  const available = availableRolesFor(state.current);
   const locked = allRoleIds.filter(rid => !available.includes(rid));
   if (locked.length > 0) {
     const lockedNames = locked.map(rid => ROLES.find(r => r.id === rid).name).join(', ');
@@ -2214,7 +2241,16 @@ function renderFocus() {
   const calc = calcDeliverable(state.current, state.focusDel);
   const main = document.getElementById('focusMain');
   const hint = tierHint(d);
+  // Hard mode hides the tier hints until the player Tests scope / Submits,
+  // and drops the recommended hour-range badges entirely. Standard shows both.
+  const isHard = state.difficultyByProject[state.current] === 'hard';
+  const showHints = !isHard || state.revealed[state.current];
+  const showRanges = !isHard;
+  const testBudget = (state.lastTest && state.lastTest.projIdx === state.current && state.lastTest.budget)
+    ? `<div class="test-budget${state.testDirty ? ' stale' : ''}"><span class="test-budget-lbl">Budget read</span>${state.testDirty ? 'Edits made — re-test to refresh. ' : ''}${state.lastTest.budget}</div>`
+    : '';
   main.innerHTML = `
+    ${testBudget}
     <div class="focus-nav">
       <div class="focus-nav-info">Deliverable ${state.focusDel + 1} of ${p.deliverables.length}</div>
       <div class="focus-nav-btns">
@@ -2222,10 +2258,10 @@ function renderFocus() {
         <button class="focus-nav-btn" id="focusNext" ${state.focusDel === p.deliverables.length - 1 ? 'disabled' : ''}>→</button>
       </div>
     </div>
-    <div class="focus-title">${d.name}${hrsRangeBadge(d, calc.hrs, state.current)}</div>
+    <div class="focus-title">${d.name}${showRanges ? hrsRangeBadge(d, calc.hrs, state.current) : ''}</div>
     <div class="focus-desc">${d.note}</div>
     ${specialtyChips(d)}
-    ${hint ? `<div class="tier-hint">${hint}</div>` : ''}
+    ${(hint && showHints) ? `<div class="tier-hint">${hint}</div>` : ''}
     ${inlineDeliverableIssues(state.focusDel)}
     <div class="focus-stats">
       <div class="focus-stat"><div class="l">Hours</div><div class="v">${calc.hrs}</div></div>
@@ -2598,7 +2634,7 @@ const SEV_RANK = { critical: 0, expected: 1, 'nice-to-have': 2 };
 
 function testScope() {
   const projIdx = state.current;
-  const { hrs } = calcProject(projIdx);
+  const { cost, hrs } = calcProject(projIdx);
   if (hrs === 0) return;
   const issues = evaluateRules(projIdx);
   const byDeliverable = {};
@@ -2608,7 +2644,11 @@ function testScope() {
       byDeliverable[iss.delIdx] = iss.severity;
     }
   });
-  state.lastTest = { projIdx, byDeliverable, issues };
+  // Budget-optimization takeaway — same engine the Submit review uses, so a
+  // dry-run Test tells the player how to move the number, not just what's flagged.
+  const budget = budgetTakeaway(reviewFacts(projIdx, cost, issues));
+  state.lastTest = { projIdx, byDeliverable, issues, budget };
+  state.revealed[projIdx] = true;   // hard mode: reveal tier hints from now on
   state.testDirty = false;
   renderFocus();
   updateTestBtn();
@@ -2638,97 +2678,22 @@ function updateTestBtn() {
 }
 
 // =============================================================
-// AI FEEDBACK
-// Posts the player's plan + outcome to /api/feedback for a tailored
-// partner-style review. Falls back silently to templated NARRATIVE if
-// the function errors, returns a bad shape, or takes longer than 6s.
+// SUBMIT / FEEDBACK
+// The partner review is generated locally by buildReview() — no
+// network call, no API key, no cost. escapeHtml guards the review
+// text before it lands in the DOM.
 // =============================================================
-const AI_TIMEOUT_MS = 6000;
-let celebrateToken = 0;
-
 function escapeHtml(s) {
   return String(s).replace(/[&<>"']/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[c]));
 }
 
-function buildAiPayload(projIdx, cost, variance, points, issues) {
-  const p = PROJECTS[projIdx];
-  const deliverables = p.deliverables.map((d, i) => {
-    const hrsForDel = state.hours[projIdx][i];
-    const staffing = ROLES
-      .map(r => ({ role: r.name, hrs: hrsForDel[r.id] || 0 }))
-      .filter(x => x.hrs > 0);
-    const calc = calcDeliverable(projIdx, i);
-    return {
-      name: d.name,
-      hrsTotal: calc.hrs,
-      cost: calc.cost,
-      staffing,
-      specialties: (d.specialties || []).map(s => SPECIALTY_LABELS[s] || s)
-    };
-  });
-  return {
-    engagement: {
-      name: p.name,
-      type: (PROJECT_TYPES[p.type] || {}).label || p.type,
-      brief: p.desc,
-      budget: budgetFor(projIdx),
-      tolerance: toleranceFor(projIdx),
-      teamSize: teamSizeFor(projIdx),
-      teamUsed: usedRolesSet(projIdx).size,
-      difficulty: state.difficultyByProject[projIdx]
-    },
-    deliverables,
-    issues: issues.map(i => {
-      const base = {
-        deliverable: i.deliverable,
-        severity: i.severity,
-        tier: i.groupLabel,
-        kind: i.kind || 'under',
-        reason: i.reason
-      };
-      if (i.kind === 'over') {
-        return { ...base, excessHrs: i.actualHrs, capHrs: i.maxHrs };
-      }
-      return { ...base, missing: i.groupLabel, gap: Math.max(0, i.minHrs - i.actualHrs) };
-    }),
-    outcome: {
-      totalFees: Math.round(cost),
-      variancePct: (variance * 100).toFixed(1),
-      score: points
-    }
-  };
-}
-
-async function requestAiFeedback(payload) {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
-  try {
-    const res = await fetch('/api/feedback', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (typeof data.headline !== 'string' || !Array.isArray(data.bullets)) return null;
-    return {
-      headline: data.headline,
-      bullets: data.bullets.filter(b => typeof b === 'string' && b.trim().length > 0).slice(0, 6)
-    };
-  } catch {
-    clearTimeout(timeoutId);
-    return null;
-  }
-}
-
 function submit() {
   const p = PROJECTS[state.current];
   const { cost, hrs } = calcProject(state.current);
   if (hrs === 0) return;
+  state.revealed[state.current] = true;   // hard mode: reveal tier hints from now on
 
   const budget = budgetFor(state.current);
   const tol = toleranceFor(state.current);
@@ -2771,126 +2736,15 @@ function submit() {
 }
 
 // =============================================================
-// NARRATIVE FEEDBACK GENERATOR
-// Builds varied feedback paragraphs by mixing fragments based on
-// score band, severity of issues, and engagement type.
+// PARTNER REVIEW — deterministic, offline feedback engine.
+// Two levers, tied together: (1) the right roles on the right work,
+// and (2) budget optimization. The bridge is a dollar-impact calc —
+// mis-tiered senior hours are repriced down to the tier the work
+// actually needs, so a staffing fix and a budget fix become the same
+// recommendation. Replaces the old NARRATIVE templates and the
+// Anthropic API partner review: no network, no cost, deterministic.
 // =============================================================
 const PICK = arr => arr[Math.floor(Math.random() * arr.length)];
-
-const NARRATIVE = {
-  // ===== OPENERS BY SCORE BAND =====
-  opener: {
-    excellent: [ // 90+
-      "Excellent staffing plan — the kind of scope that walks into procurement and gets signed.",
-      "This is a clean, well-leveraged scope. The mix reflects how senior teams actually run engagements.",
-      "Sharp work. The staffing mirrors how a partner would build this on the back of an envelope.",
-      "Strong scope. The seniority distribution, coverage, and pricing all hold together.",
-      "Well-built. The engagement economics work, and so does the delivery model.",
-      "This scope reads like someone who has actually run an engagement of this type."
-    ],
-    good: [ // 75-89
-      "Solid scope overall — the budget envelope works and most of the staffing is appropriate.",
-      "This is a credible scope. A few staffing choices are worth a second look before it goes to the client.",
-      "The fundamentals are right. With minor adjustments, this becomes a really clean engagement letter.",
-      "Good shape. Budget aligns and coverage is broad — refinement opportunities below.",
-      "This will fly through procurement. The notes below would sharpen the delivery confidence further."
-    ],
-    fair: [ // 60-74
-      "The scope works on paper but has some staffing decisions that would raise eyebrows in a deal review.",
-      "You've landed the budget, but the staffing mix doesn't fully match how this engagement gets delivered.",
-      "This is approvable, but a senior reviewer would push back on a few line items before it goes external.",
-      "Budget holds, scope is covered — but the seniority distribution needs work in places.",
-      "You got there on the numbers. The seniority story needs reinforcement in a couple of workstreams."
-    ],
-    poor: [ // <60
-      "The scope approves on math alone but isn't really deliverable as staffed — significant rework needed.",
-      "This is a budget that works for the team but probably can't deliver for the client. Staffing mix needs revisiting.",
-      "Several workstreams are critically under-leveraged at the senior end. A reviewer would send this back.",
-      "The pricing lands but the staffing plan won't survive a partner review."
-    ]
-  },
-
-  // ===== TRANSITION PHRASES =====
-  transition: [
-    "That said,",
-    "A few specific notes:",
-    "Worth flagging:",
-    "One thing to watch:",
-    "On the staffing specifically,",
-    "Looking deeper at the mix,",
-    "The detail to reconsider:",
-    "Where this needs sharpening:"
-  ],
-
-  // ===== ISSUE-SPECIFIC TEMPLATES BY GROUP =====
-  // {del} = deliverable name, {grp} = role group label
-  issueByGroup: {
-    partner_director: [
-      "{del} is fundamentally a Partner-Director deliverable — staffing without senior leadership reads as junior to the client",
-      "the {del} can't reasonably ship without Partner, MD, Sr. Director, or Director ownership",
-      "without senior presence on {del}, the client will read this as the firm sending the B-team",
-      "a deliverable like {del} is where the client expects to see firm leadership, not just delivery talent",
-      "the {del} is the kind of work that gets attention at the most senior level — under-staffing it signals a lack of importance",
-      "{del} should have visible Partner-Director involvement; without it, the engagement loses gravitas",
-      "the {del} is a project leadership workstream — without senior ownership, accountability is unclear",
-      "a Partner, MD, Sr. Director, or Director owner on {del} would tighten the delivery confidence considerably"
-    ],
-    manager: [
-      "{del} is a Manager-level workstream — needs Sr. Manager or Manager ownership for credibility",
-      "the {del} should be Manager-led — currently it's hidden inside delivery hours or top-heavy",
-      "a Sr. Manager or Manager presence on {del} is the missing piece — this is where engagements run into operational drag",
-      "{del} is a coordination/PMO function — it should be sized with Manager-level hours, not pushed to senior staff or Associates",
-      "the {del} workstream needs a clear Manager-level owner",
-      "without Manager-level execution on {del}, the engagement loses its operational backbone"
-    ],
-    associate: [
-      "{del} is well-suited for Associate-level talent but is currently over-leveraged at senior levels; that's expensive without adding speed",
-      "the {del} should lean on Sr. Associates and Associates — using senior hours on execution erodes margin",
-      "more Associate leverage on {del} would protect engagement economics without affecting quality",
-      "{del} needs hands-on Associate-level delivery presence — currently it's top-heavy"
-    ]
-  },
-
-  // ===== LEVERAGE / MARGIN OBSERVATIONS =====
-  blended_high: [ // blended rate too high
-    "Your blended rate is on the high side — there's likely room to flex more delivery hours to mid-level talent and improve margin.",
-    "The blended rate signals over-leverage at senior levels. A few workstreams could shift down without affecting quality.",
-    "Blended rate is partner-heavy. Pushing some execution down would free margin and free senior time for client-facing work."
-  ],
-  blended_low: [ // blended rate too low — under-staffed seniority
-    "Your blended rate is unusually low for this engagement type, which often signals the senior team isn't visible enough in delivery.",
-    "Low blended rate is sometimes a tell that the engagement is under-led at the partner/MD level — the client will feel it.",
-    "Blended rate is on the light side, which can be efficient but can also mean the senior bench isn't engaged where it matters."
-  ],
-
-  // ===== CLOSERS =====
-  closer: {
-    excellent: [
-      "Worth running this exact mix in a real proposal.",
-      "Lock it in.",
-      "Ready for procurement.",
-      "This is what \"well-scoped\" looks like."
-    ],
-    good: [
-      "Tighten the items above and this is a strong proposal.",
-      "Small adjustments, big payoff.",
-      "Almost there — a couple of fixes and this ships.",
-      "One more pass and this becomes textbook."
-    ],
-    fair: [
-      "Worth another round before this goes to the partner.",
-      "The bones are right. The senior story needs reinforcing.",
-      "Revisit the flagged workstreams and you'll move into a much stronger position.",
-      "Take another look at where senior leverage actually adds value."
-    ],
-    poor: [
-      "Worth starting over from the senior workstreams down.",
-      "Strong recommendation: re-scope from the top.",
-      "Reconsider where the partner and MD presence shows up.",
-      "Build this back up from a Partner-led foundation."
-    ]
-  }
-};
 
 function bandFromPoints(pts) {
   if (pts >= 90) return 'excellent';
@@ -2899,89 +2753,216 @@ function bandFromPoints(pts) {
   return 'poor';
 }
 
-// Build a varied narrative paragraph
-function buildNarrative(points, issues, cost, projIdx) {
-  const band = bandFromPoints(points);
-  const parts = [];
+const TIER_SHORT = {
+  partner_director: 'Partner–Director',
+  manager: 'Manager-level',
+  associate: 'Associate-level'
+};
+const EXEC_PLURAL = { associate: 'Associates', manager: 'Managers' };
 
-  // 1. Opener
-  parts.push(PICK(NARRATIVE.opener[band]));
-
-  // 2. Specific issue call-outs — pick up to 2 most severe, varied templates
-  const sortedIssues = [...issues].sort((a, b) => {
-    const sevOrder = { critical: 0, expected: 1, 'nice-to-have': 2 };
-    return sevOrder[a.severity] - sevOrder[b.severity];
+// Cheapest available role rate within a bucket for this engagement.
+function cheapestRateInBucket(projIdx, bucket) {
+  const avail = new Set(availableRolesFor(projIdx));
+  let best = null;
+  (ROLE_GROUPS[bucket] || []).forEach(id => {
+    if (!avail.has(id)) return;
+    const r = ROLES.find(x => x.id === id);
+    if (r && (best === null || r.rate < best)) best = r.rate;
   });
-  const calloutCount = Math.min(2, sortedIssues.length);
-  if (calloutCount > 0) {
-    parts.push(PICK(NARRATIVE.transition));
-    const calloutFragments = [];
-    for (let i = 0; i < calloutCount; i++) {
-      const issue = sortedIssues[i];
-      const templates = NARRATIVE.issueByGroup[issue.group] || [];
-      if (templates.length > 0) {
-        let frag = PICK(templates)
-          .replaceAll('{del}', issue.deliverable)
-          .replaceAll('{grp}', issue.groupLabel);
-        // Avoid stitching the same wording twice — quick check
-        if (!calloutFragments.includes(frag)) calloutFragments.push(frag);
-      }
-    }
-    if (calloutFragments.length > 0) {
-      parts.push(calloutFragments.join('; ') + '.');
-    }
-  }
-
-  // 3. Margin / leverage observation
-  const totalHrs = calcProject(projIdx).hrs;
-  const blended = totalHrs > 0 ? cost / totalHrs : 0;
-  if (blended > 380) {
-    parts.push(PICK(NARRATIVE.blended_high));
-  } else if (blended < 220 && totalHrs > 40) {
-    parts.push(PICK(NARRATIVE.blended_low));
-  }
-
-  // 4. Closer
-  parts.push(PICK(NARRATIVE.closer[band]));
-
-  return parts.join(' ');
+  return best;
 }
 
-function renderAiFeedback(result, fallbackText) {
+// The execution tier a deliverable expects — used to reprice mis-tiered
+// senior hours down. Prefer the associate tier when the deliverable has an
+// associate minimum; otherwise fall back to manager.
+function targetExecTier(projIdx, delIdx) {
+  const d = PROJECTS[projIdx].deliverables[delIdx];
+  const wantsAssoc = (d.rules || []).some(r => r.group === 'associate' && typeof r.minHrs === 'number');
+  return wantsAssoc ? 'associate' : 'manager';
+}
+
+// For an over-staffing issue, estimate the dollars freed by moving the
+// excess hours from the senior roles actually used down to the exec tier.
+function overIssueSaving(projIdx, issue) {
+  const delH = state.hours[projIdx][issue.delIdx] || {};
+  const used = (ROLE_GROUPS[issue.group] || [])
+    .map(id => ({ rate: (ROLES.find(r => r.id === id) || {}).rate || 0, hrs: delH[id] || 0 }))
+    .filter(x => x.hrs > 0)
+    .sort((a, b) => b.rate - a.rate);
+  let excess = Math.max(0, issue.actualHrs - (issue.maxHrs || 0));
+  const targetBucket = targetExecTier(projIdx, issue.delIdx);
+  let targetRate = cheapestRateInBucket(projIdx, targetBucket);
+  if (targetRate === null) targetRate = cheapestRateInBucket(projIdx, 'associate');
+  if (targetRate === null) targetRate = 0;
+  let saving = 0, moved = 0;
+  for (const role of used) {
+    if (excess <= 0) break;
+    const take = Math.min(role.hrs, excess);
+    saving += take * Math.max(0, role.rate - targetRate);
+    moved += take;
+    excess -= take;
+  }
+  return { saving: Math.round(saving), moved, targetBucket };
+}
+
+// Compute every fact a review needs, once.
+function reviewFacts(projIdx, cost, issues) {
+  const budget = budgetFor(projIdx);
+  const tol = toleranceFor(projIdx);
+  const { hrs } = calcProject(projIdx);
+  const overBy = cost - budget;                       // signed dollars
+  const variance = budget ? Math.abs(overBy) / budget : 0;
+  const withinTol = variance <= tol;
+  const blended = hrs > 0 ? cost / hrs : 0;
+
+  const overIssues = issues.filter(i => i.kind === 'over')
+    .map(i => ({ ...i, ...overIssueSaving(projIdx, i) }))
+    .sort((a, b) => b.saving - a.saving);
+  const totalOverSaving = overIssues.reduce((s, i) => s + i.saving, 0);
+
+  const sevRank = { critical: 0, expected: 1, 'nice-to-have': 2 };
+  const underIssues = issues.filter(i => i.kind !== 'over')
+    .sort((a, b) => sevRank[a.severity] - sevRank[b.severity]);
+  const criticalUnder = underIssues.filter(i => i.severity === 'critical');
+
+  const flagged = new Set(issues.map(i => i.delIdx));
+  const cleanStaffed = [];
+  PROJECTS[projIdx].deliverables.forEach((d, i) => {
+    if (calcDeliverable(projIdx, i).hrs > 0 && !flagged.has(i)) cleanStaffed.push(d.name);
+  });
+
+  return {
+    budget, tol, hrs, cost, overBy, variance, withinTol, blended,
+    overIssues, totalOverSaving, underIssues, criticalUnder, cleanStaffed,
+    teamUsed: usedRolesSet(projIdx).size, teamCap: teamSizeFor(projIdx)
+  };
+}
+
+// One plain-English budget sentence, shared by Submit and Test scope.
+function budgetTakeaway(f) {
+  const pct = (f.variance * 100).toFixed(1);
+  const lever = f.overIssues[0];
+  // Over budget, past tolerance
+  if (f.overBy > 0 && !f.withinTol) {
+    if (f.totalOverSaving > 0 && lever) {
+      const covers = f.totalOverSaving >= f.overBy;
+      return `You're ${fmt(f.overBy)} over. Fastest lever: ${lever.deliverable} is carrying ${TIER_SHORT[lever.group]} hours on work the ${EXEC_PLURAL[lever.targetBucket] || 'delivery team'} should own — moving the mis-tiered hours down frees about ${fmt(f.totalOverSaving)}${covers ? ', which on its own lands you inside budget.' : '. Flex a few more senior hours down to close the rest.'}`;
+    }
+    return `You're ${fmt(f.overBy)} over. The senior mix is heavier than the work needs — shift execution hours down to mid- and analyst-level to bring the number in.`;
+  }
+  // Under budget, past tolerance
+  if (f.overBy < 0 && !f.withinTol) {
+    const head = Math.abs(f.overBy);
+    if (f.criticalUnder.length) {
+      const u = f.criticalUnder[0];
+      return `You've got about ${fmt(head)} of headroom, and ${u.deliverable} has no ${TIER_SHORT[u.group]} presence where it's expected — that's where the budget is worth spending.`;
+    }
+    return `You've got about ${fmt(head)} of headroom. There's room to add senior review time where it strengthens the work.`;
+  }
+  // Within tolerance
+  if (f.totalOverSaving > 0 && lever) {
+    return `Priced within ${pct}% of budget — though about ${fmt(f.totalOverSaving)} of it is ${TIER_SHORT[lever.group]} time on ${lever.deliverable} that a lower tier could carry. Tightening it protects margin.`;
+  }
+  return `Priced within ${pct}% of budget${f.variance < 0.02 ? ' — tight, credible pricing.' : '.'}`;
+}
+
+// Tier-appropriate role-fit sentence for one under-staffed deliverable.
+function roleGapPhrase(issue) {
+  const del = issue.deliverable;
+  if (issue.group === 'partner_director') {
+    return `${del} reads as senior-led work but has no Partner–Director presence — that's the deliverable a client expects owned at that level.`;
+  }
+  if (issue.group === 'manager') {
+    return `${del} needs a clear Manager-level owner and has none — that's where operational continuity tends to slip.`;
+  }
+  return `${del} is analyst execution that should sit with Associates — it's under-resourced there right now.`;
+}
+
+// The deliverable the budget takeaway already names, so role-fit bullets don't
+// repeat it. Mirrors the branching in budgetTakeaway().
+function budgetMentionedDeliverable(f) {
+  const lever = f.overIssues[0];
+  if (f.overBy > 0 && !f.withinTol) return lever ? lever.deliverable : null;
+  if (f.overBy < 0 && !f.withinTol) return f.criticalUnder.length ? f.criticalUnder[0].deliverable : null;
+  if (f.totalOverSaving > 0 && lever) return lever.deliverable;
+  return null;
+}
+
+// Up to two role-fit sentences, criticals first, skipping any deliverable the
+// budget line already covered.
+function roleFitBullets(f, exclude) {
+  const skip = new Set(exclude || []);
+  const seen = new Set();
+  const out = [];
+  for (const iss of [...f.criticalUnder, ...f.underIssues]) {
+    if (skip.has(iss.deliverable) || seen.has(iss.deliverable)) continue;
+    seen.add(iss.deliverable);
+    out.push(roleGapPhrase(iss));
+    if (out.length >= 2) break;
+  }
+  return out;
+}
+
+// Full partner review for the Submit screen: { headline, bullets[] }.
+function buildReview(projIdx, cost, points, issues) {
+  const f = reviewFacts(projIdx, cost, issues);
+  const band = bandFromPoints(points);
+  const bullets = [];
+
+  // 1. Budget lever — always first; it's the headline lesson.
+  bullets.push(budgetTakeaway(f));
+
+  // 2. Role fit — up to two specific gaps, minus whatever the budget line named.
+  const mentioned = budgetMentionedDeliverable(f);
+  roleFitBullets(f, mentioned ? [mentioned] : []).forEach(b => bullets.push(b));
+
+  // 3. Praise something specific that's correctly leveled.
+  if (f.cleanStaffed.length >= 2 && (band === 'excellent' || band === 'good')) {
+    const names = f.cleanStaffed.slice(0, 2).join(' and ');
+    bullets.push(`${names} are staffed at the right level — good read on where seniority does and doesn't belong.`);
+  } else if (f.cleanStaffed.length === 1 && band !== 'poor') {
+    bullets.push(`${f.cleanStaffed[0]} is leveled well.`);
+  }
+
+  // 4. Team-focus nudge when the roster is sprawling and there are issues.
+  if (f.teamUsed >= f.teamCap && f.teamCap > 0 && issues.length > 0) {
+    bullets.push(`You're using the full ${f.teamCap}-role team — make sure each role earns its place rather than adding blended-rate drag.`);
+  }
+
+  const headlineByBand = {
+    excellent: 'Cleanly scoped and priced to deliver.',
+    good: 'Solid scope — a couple of levers left on the table.',
+    fair: 'Approvable, but the staffing-to-budget story needs tightening.',
+    poor: 'The math clears; the staffing plan needs real rework.'
+  };
+  let headline = headlineByBand[band];
+  if (f.overBy > 0 && !f.withinTol) headline = 'Over budget — but the fix is in the staffing mix.';
+  else if (f.overBy < 0 && !f.withinTol) headline = 'Under budget — put the headroom where it counts.';
+
+  return { headline, bullets: bullets.slice(0, 5) };
+}
+
+// Renders the deterministic partner review (headline + bullets) into the
+// celebrate modal. Synchronous — no loading state, no network.
+function renderReview(review, fallbackText) {
   const aiEl = document.getElementById('celAi');
   const aiHead = document.getElementById('celAiHead');
   const aiHeadline = document.getElementById('celAiHeadline');
   const aiBullets = document.getElementById('celAiBullets');
   const aiLoading = document.getElementById('celAiLoading');
   const msgEl = document.getElementById('celMsg');
-  if (result) {
+  if (aiLoading) aiLoading.style.display = 'none';
+  if (review) {
     aiEl.classList.remove('loading');
     aiEl.style.display = '';
-    aiHead.textContent = 'AI feedback';
-    aiHeadline.textContent = result.headline;
-    aiBullets.innerHTML = result.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join('');
-    aiLoading.style.display = 'none';
+    aiHead.textContent = 'Partner review';
+    aiHeadline.textContent = review.headline;
+    aiBullets.innerHTML = review.bullets.map(b => `<li>${escapeHtml(b)}</li>`).join('');
     msgEl.textContent = '';
   } else {
     aiEl.style.display = 'none';
     msgEl.textContent = fallbackText || '';
   }
-}
-
-function showAiLoading() {
-  const aiEl = document.getElementById('celAi');
-  const aiHead = document.getElementById('celAiHead');
-  const aiHeadline = document.getElementById('celAiHeadline');
-  const aiBullets = document.getElementById('celAiBullets');
-  const aiLoading = document.getElementById('celAiLoading');
-  const msgEl = document.getElementById('celMsg');
-  aiEl.style.display = '';
-  aiEl.classList.add('loading');
-  aiHead.textContent = 'AI feedback';
-  aiHeadline.textContent = '';
-  aiBullets.innerHTML = '';
-  aiLoading.style.display = '';
-  msgEl.textContent = '';
 }
 
 function showCelebrate(mode, cost, variance, points, extra = {}) {
@@ -3022,8 +3003,8 @@ function showCelebrate(mode, cost, variance, points, extra = {}) {
     issuesContainer.style.display = 'none';
   }
 
-  let fallbackNarrative = '';
-  let runAi = true;
+  let review = null;      // { headline, bullets[] } → the Partner review panel
+  let fallbackMsg = '';   // plain paragraph shown when there's no review
 
   if (mode === 'win') {
     const band = bandFromPoints(points);
@@ -3041,39 +3022,30 @@ function showCelebrate(mode, cost, variance, points, extra = {}) {
       poor: ['Approved on math only.', 'Technically approved.']
     };
     document.getElementById('celTitle').textContent = PICK(titleByBand[band]);
-    fallbackNarrative = buildNarrative(points, allIssues, cost, state.current);
+    review = buildReview(state.current, cost, points, allIssues);
     document.getElementById('celNext').style.display = state.current < PROJECTS.length - 1 ? '' : 'none';
     if (state.current === PROJECTS.length - 1 && state.solved.every(Boolean)) {
       document.getElementById('celEmoji').textContent = '🏆';
       document.getElementById('celTitle').textContent = 'All eight engagements approved.';
-      fallbackNarrative = `Final score: ${state.totalScore} of ${PROJECTS.length * 100}. Every engagement priced to deliver for the client and protect team economics. Strong work.`;
-      runAi = false;
+      review = null;
+      fallbackMsg = `Final score: ${state.totalScore} of ${PROJECTS.length * 100}. Every engagement priced to deliver for the client and protect team economics. Strong work.`;
     }
     if (band === 'excellent' || band === 'good') launchConfetti();
   } else if (mode === 'coverage') {
     document.getElementById('celEmoji').textContent = '🤔';
     document.getElementById('celTitle').textContent = 'Coverage gap';
-    fallbackNarrative = `The budget envelope works, but only ${extra.deliverablesWithHours} of ${extra.total} deliverables are staffed. The client expects the team to be resourced across the full scope of work — plan staffing for at least ${extra.minRequired} workstreams.`;
+    fallbackMsg = `The budget envelope works, but only ${extra.deliverablesWithHours} of ${extra.total} deliverables are staffed. The client expects the team resourced across the full scope of work — plan staffing for at least ${extra.minRequired} workstreams.`;
     document.getElementById('celNext').style.display = 'none';
   } else {
     document.getElementById('celEmoji').textContent = '🎯';
     document.getElementById('celTitle').textContent = 'Scope needs adjustment';
-    fallbackNarrative = 'Your fee position is outside the client\'s budget envelope. Revisit the staffing mix — consider where senior leverage adds value and where you can flex to mid-level talent.';
+    // Missed the budget envelope — the partner review leads with the exact
+    // dollar gap and the fastest staffing lever to close it.
+    review = buildReview(state.current, cost, 0, allIssues);
     document.getElementById('celNext').style.display = 'none';
   }
 
-  if (runAi) {
-    showAiLoading();
-    const myToken = ++celebrateToken;
-    const payload = buildAiPayload(state.current, cost, variance, points, allIssues);
-    requestAiFeedback(payload).then(result => {
-      if (myToken !== celebrateToken) return;
-      renderAiFeedback(result, fallbackNarrative);
-    });
-  } else {
-    document.getElementById('celAi').style.display = 'none';
-    document.getElementById('celMsg').textContent = fallbackNarrative;
-  }
+  renderReview(review, fallbackMsg);
 
   overlay.classList.add('show');
   renderPicker();
@@ -3103,6 +3075,7 @@ document.getElementById('resetBtn').addEventListener('click', () => {
   state.hours[state.current] = p.deliverables.map(() => Object.fromEntries(ROLES.map(r => [r.id, 0])));
   state.lastTest = null;
   state.testDirty = false;
+  state.revealed[state.current] = false;
   renderFocus();
   renderBudget();
   updateTestBtn();
@@ -3116,6 +3089,7 @@ document.getElementById('diffToggle').addEventListener('click', e => {
   state.difficultyByProject[state.current] = nextDiff;
   state.lastTest = null;
   state.testDirty = false;
+  state.revealed[state.current] = false;   // re-hide hints when entering Hard
   renderBrief();
   renderFocus();
   renderBudget();
