@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Staffing Draft — prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#f7f4ef; --surface:#fff; --surface-2:#fcfaf6;
+    --ink:#1a1d29; --ink-2:#4a5060; --ink-3:#8a90a0;
+    --line:#ebe7df; --line-2:#d9d3c7;
+    --p1:#6366f1; --p1-soft:#eef0ff; --p1-deep:#4f46e5;
+    --good:#10b981; --good-soft:#d1fae5; --bad:#ef4444; --bad-soft:#fee2e2;
+    --warn:#f59e0b; --warn-soft:#fef3c7;
+    --senior:#7c3aed; --senior-soft:#f3e8ff;
+    --mid:#0891b2; --mid-soft:#cffafe;
+    --assoc:#0d9488; --assoc-soft:#ccfbf1;
+    --r-sm:8px; --r-md:12px; --r-lg:18px; --r-full:999px;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:'Plus Jakarta Sans',system-ui,sans-serif; background:var(--bg); color:var(--ink); line-height:1.5; -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:1120px; margin:0 auto; padding:24px 20px 64px; }
+
+  header.top { display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:20px; }
+  .brand { font-weight:800; font-size:20px; letter-spacing:-0.01em; }
+  .brand small { display:block; font-weight:500; font-size:12px; color:var(--ink-3); letter-spacing:0; }
+  .proto-tag { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--p1-deep); background:var(--p1-soft); padding:4px 8px; border-radius:var(--r-full); }
+
+  .section-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-2); margin:26px 0 12px; display:flex; justify-content:space-between; align-items:center; }
+
+  /* ---- Engagement cards ---- */
+  .eng-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px; }
+  .eng-card { background:var(--surface); border:1px solid var(--line); border-top:3px solid var(--div-color,#999); border-radius:var(--r-md); padding:16px 16px 14px; cursor:pointer; transition:box-shadow .12s, transform .08s; display:flex; flex-direction:column; gap:10px; min-height:118px; }
+  .eng-card:hover { box-shadow:0 4px 14px rgba(0,0,0,.07); transform:translateY(-1px); }
+  .eng-card.locked { cursor:default; opacity:.9; }
+  .eng-card.locked:hover { box-shadow:none; transform:none; }
+  .eng-name { font-size:17px; font-weight:800; letter-spacing:-0.01em; }
+  .eng-div { display:inline-flex; align-items:center; gap:6px; font-size:11.5px; font-weight:700; color:var(--div-color,#555); margin-top:2px; }
+  .eng-div::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--div-color,#999); }
+  .eng-foot { margin-top:auto; display:flex; align-items:center; justify-content:space-between; }
+  .status { font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; padding:3px 8px; border-radius:var(--r-full); }
+  .status.needed { background:var(--warn-soft); color:#92600b; }
+  .status.sample { background:var(--good-soft); color:#0a6b4b; }
+  .status.estimate { background:var(--p1-soft); color:var(--p1-deep); }
+  .eng-go { font-size:12px; font-weight:700; color:var(--ink-3); }
+
+  /* ---- Firm bench roster ---- */
+  .firm-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; }
+  .firm-card { background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--assoc); border-radius:var(--r-md); padding:10px 12px; }
+  .firm-card.tier-partner_director { border-left-color:var(--senior); }
+  .firm-card.tier-manager { border-left-color:var(--mid); }
+  .firm-card.tier-associate { border-left-color:var(--assoc); }
+  .firm-name { font-weight:700; font-size:14px; }
+  .firm-role { font-size:11.5px; color:var(--ink-2); display:flex; justify-content:space-between; margin-top:1px; }
+  .firm-rate { font-family:'JetBrains Mono',monospace; color:var(--ink-3); }
+
+  /* ---- Board view ---- */
+  .hidden { display:none !important; }
+  .back { background:none; border:none; font-family:inherit; font-size:13px; font-weight:600; color:var(--ink-2); cursor:pointer; padding:0; margin-bottom:14px; }
+  .board-eng { display:flex; gap:20px; align-items:center; flex-wrap:wrap; background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:16px 20px; margin-bottom:20px; }
+  .board-eng .meta { flex:1; min-width:220px; }
+  .board-eng .eng-name { font-size:19px; }
+  .board-eng .val { text-align:right; }
+  .board-eng .val .l { font-size:10px; text-transform:uppercase; letter-spacing:0.05em; color:var(--ink-3); font-weight:700; }
+  .board-eng .val .v { font-size:22px; font-weight:800; font-family:'JetBrains Mono',monospace; }
+  .how { font-size:12.5px; color:var(--ink-2); background:var(--surface-2); border:1px dashed var(--line-2); border-radius:var(--r-sm); padding:10px 12px; margin-bottom:20px; }
+  .board { display:grid; grid-template-columns:300px 1fr; gap:22px; align-items:start; }
+  @media (max-width:820px){ .board { grid-template-columns:1fr; } }
+  .bench { position:sticky; top:16px; }
+  .panel-head { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-2); margin-bottom:10px; display:flex; justify-content:space-between; }
+  .bench-list { display:flex; flex-direction:column; gap:9px; }
+  .char { background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--assoc); border-radius:var(--r-md); padding:10px 12px; cursor:grab; user-select:none; transition:box-shadow .12s, opacity .12s; }
+  .char:hover { box-shadow:0 3px 10px rgba(0,0,0,.06); }
+  .char.tier-partner_director { border-left-color:var(--senior); }
+  .char.tier-manager { border-left-color:var(--mid); }
+  .char.tier-associate { border-left-color:var(--assoc); }
+  .char.picked { outline:2px solid var(--p1); outline-offset:1px; }
+  .char.placed { opacity:.35; pointer-events:none; }
+  .char-name { font-weight:700; font-size:14px; }
+  .char-role { font-size:11.5px; color:var(--ink-2); display:flex; justify-content:space-between; margin-top:1px; }
+  .char-rate { font-family:'JetBrains Mono',monospace; color:var(--ink-3); }
+  .delivs { display:flex; flex-direction:column; gap:14px; }
+  .deliv { background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:14px 16px; transition:border-color .12s, background .12s; }
+  .deliv.drop-hot { border-color:var(--p1); background:var(--p1-soft); }
+  .deliv-top { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+  .deliv-name { font-weight:700; font-size:15px; }
+  .deliv-val { font-family:'JetBrains Mono',monospace; font-weight:700; font-size:14px; color:var(--ink-2); white-space:nowrap; }
+  .deliv-note { font-size:12px; color:var(--ink-3); margin:2px 0 10px; }
+  .slots { display:flex; flex-wrap:wrap; gap:7px; min-height:40px; align-content:flex-start; padding:8px; border:1.5px dashed var(--line-2); border-radius:var(--r-sm); background:var(--surface-2); }
+  .slots.empty::before { content:'Drop a person here — or tap someone in the bench, then tap here'; font-size:11.5px; color:var(--ink-3); font-style:italic; }
+  .chip { display:inline-flex; align-items:center; gap:6px; background:var(--surface); border:1px solid var(--line-2); border-left:3px solid var(--assoc); border-radius:var(--r-full); padding:4px 6px 4px 10px; font-size:12.5px; font-weight:600; }
+  .chip.tier-partner_director { border-left-color:var(--senior); }
+  .chip.tier-manager { border-left-color:var(--mid); }
+  .chip.tier-associate { border-left-color:var(--assoc); }
+  .chip button { border:none; background:var(--line); color:var(--ink-2); width:17px; height:17px; border-radius:50%; cursor:pointer; font-size:12px; line-height:1; }
+  .chip button:hover { background:var(--bad); color:#fff; }
+  .actions { display:flex; gap:10px; margin-top:22px; }
+  .btn { font-family:inherit; font-weight:700; font-size:14px; border-radius:var(--r-sm); padding:11px 20px; cursor:pointer; border:1px solid var(--line-2); background:var(--surface); color:var(--ink); }
+  .btn.primary { background:var(--ink); color:#fff; border-color:var(--ink); }
+
+  .overlay { position:fixed; inset:0; background:rgba(26,29,41,.5); display:none; align-items:center; justify-content:center; padding:20px; z-index:50; }
+  .overlay.show { display:flex; }
+  .result { background:var(--surface); border-radius:var(--r-lg); max-width:520px; width:100%; padding:26px; max-height:88vh; overflow:auto; }
+  .result h2 { font-size:22px; }
+  .result .score { font-size:44px; font-weight:800; font-family:'JetBrains Mono',monospace; margin:4px 0 2px; }
+  .review-head { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:var(--p1-deep); margin:16px 0 6px; }
+  .review-headline { font-weight:700; margin-bottom:8px; }
+  .review ul { list-style:none; display:flex; flex-direction:column; gap:8px; }
+  .review li { font-size:13.5px; padding-left:16px; position:relative; }
+  .review li::before { content:''; position:absolute; left:0; top:7px; width:6px; height:6px; border-radius:50%; background:var(--p1); }
+  .review li.good::before { background:var(--good); }
+  .review li.bad::before { background:var(--bad); }
+  .review li.warn::before { background:var(--warn); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">The Scoping Room <small>Staffing Draft — mechanic prototype</small></div>
+    <span class="proto-tag">Prototype · placeholder data</span>
+  </header>
+
+  <!-- ============ HOME ============ -->
+  <div id="home">
+    <div class="section-label"><span>Engagements</span><span id="engStatus"></span></div>
+    <div class="eng-grid" id="engGrid"></div>
+
+    <div class="section-label"><span>The firm · your bench</span><span id="firmCount"></span></div>
+    <div class="firm-grid" id="firmGrid"></div>
+  </div>
+
+  <!-- ============ BOARD ============ -->
+  <div id="board" class="hidden">
+    <button class="back" id="backBtn">← All engagements</button>
+    <div class="board-eng">
+      <div class="meta">
+        <div class="eng-name" id="bName"></div>
+        <div class="eng-div" id="bDiv"></div>
+        <div class="deliv-note" id="bDesc" style="margin-top:6px;"></div>
+      </div>
+      <div class="val"><div class="l">Contract value</div><div class="v" id="bValue"></div></div>
+    </div>
+    <div class="how">
+      Put the right <strong>people</strong> on the right <strong>work</strong>. Your bench is fixed — each person can only be in one place. The fee for each deliverable is set by the contract; the skill is <strong>who</strong> you assign, not how many hours.
+    </div>
+    <div class="board">
+      <div class="bench">
+        <div class="panel-head"><span>Bench for this engagement</span><span id="benchCount"></span></div>
+        <div class="bench-list" id="benchList"></div>
+      </div>
+      <div>
+        <div class="panel-head"><span>Deliverables</span><span id="assignedCount"></span></div>
+        <div class="delivs" id="delivs"></div>
+        <div class="actions">
+          <button class="btn primary" id="scoreBtn">Score staffing</button>
+          <button class="btn" id="clearBtn">Clear</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="result">
+    <h2 id="resTitle"></h2>
+    <div class="score" id="resScore"></div>
+    <div class="review">
+      <div class="review-head">Partner review</div>
+      <div class="review-headline" id="resHeadline"></div>
+      <ul id="resBullets"></ul>
+    </div>
+    <div class="actions"><button class="btn primary" id="resClose">Keep adjusting</button></div>
+  </div>
+</div>
+
+<script>
+// =============================================================
+// STAFFING DRAFT — mechanic prototype (multi-engagement frame)
+// Divisions + projects come from the client's real service lines.
+// Named firm bench maps to the real roles/rates. Real (sanitized)
+// contract deliverables + values slot into each engagement's
+// `deliverables` + `bench` when they're available.
+// =============================================================
+
+const TIER = {
+  partner_director: { label: 'Partner–Director', short: 'Senior',  rank: 3 },
+  manager:          { label: 'Manager',          short: 'Mid',     rank: 2 },
+  associate:        { label: 'Associate',        short: 'Analyst', rank: 1 }
+};
+
+// Divisions = the firm's service lines (shown under each project name).
+const DIVISIONS = {
+  clinops:  { label: 'Clin Ops', color: '#14b8a6' },
+  bi:       { label: 'BI',       color: '#0ea5e9' },
+  ops:      { label: 'Ops',      color: '#f97316' },
+  sg:       { label: 'S&G',      color: '#6366f1' },
+  finance:  { label: 'Finance',  color: '#10b981' },
+  vq:       { label: 'V&Q',      color: '#a855f7' },
+  catchall: { label: 'Catch All',color: '#64748b' }
+};
+
+// The firm bench — random names mapped to the real roles + rates.
+const FIRM = [
+  { id: 'p1',   name: 'Adrian Thorne',    role: 'Partner',      tier: 'partner_director', rate: 495 },
+  { id: 'md1',  name: 'Vivian Reyes',     role: 'Mng Dir',      tier: 'partner_director', rate: 465 },
+  { id: 'srd1', name: 'Marcus Alderton',  role: 'Sr Dir',       tier: 'partner_director', rate: 420 },
+  { id: 'dir1', name: 'Cassian Vale',     role: 'Director',     tier: 'partner_director', rate: 355 },
+  { id: 'srm1', name: 'Odette Brandt',    role: 'Sr Mgr',       tier: 'manager',          rate: 295 },
+  { id: 'mgr1', name: 'Declan Ross',      role: 'Manager',      tier: 'manager',          rate: 265 },
+  { id: 'sra1', name: 'Pia Novak',        role: 'Sr Associate', tier: 'associate',        rate: 175 },
+  { id: 'sra2', name: 'Theo Lindqvist',   role: 'Sr Associate', tier: 'associate',        rate: 175 },
+  { id: 'a1',   name: 'Milo Frost',       role: 'Associate',    tier: 'associate',        rate: 145 },
+  { id: 'a2',   name: 'Reya Okonkwo',     role: 'Associate',    tier: 'associate',        rate: 145 }
+];
+const firmById = id => FIRM.find(c => c.id === id);
+
+// Engagements — project + division. Deliverables/values below are ESTIMATES
+// (status: 'estimate') so every board is workable while we iterate on design;
+// they get replaced by real sanitized contract data. Medicare Bloom is the
+// original sample. `expect` = tiers the work genuinely needs; `forbid` = tiers
+// that shouldn't touch it (senior burned on execution).
+const ENGAGEMENTS = [
+  { id: 'e1', name: 'CalAIM', division: 'clinops', status: 'estimate', value: 120000,
+    desc: 'Stand up an Enhanced Care Management (ECM) and Community Supports program under CalAIM for a Medi-Cal managed care population.',
+    bench: ['srd1', 'srm1', 'sra1', 'a1', 'a2'],
+    deliverables: [
+      { id: 'd1', name: 'Project Management & Coordination', note: 'Kickoff, status, DHCS deadline tracking', value: 12000, expect: ['associate'], forbid: ['partner_director'] },
+      { id: 'd2', name: 'ECM Eligibility & Population Analysis', note: 'Tiering, target population sizing, data pulls', value: 34000, expect: ['associate'], forbid: [] },
+      { id: 'd3', name: 'Care Management Workflow Design', note: 'Care model, staffing model, provider workflows', value: 44000, expect: ['manager', 'associate'], forbid: [] },
+      { id: 'd4', name: 'DHCS Reporting & Compliance Readout', note: 'Reporting build, compliance narrative, exec readout', value: 30000, expect: ['partner_director', 'associate'], forbid: [] }
+    ] },
+  { id: 'e2', name: 'Ledger', division: 'bi', status: 'estimate', value: 95000,
+    desc: 'Build an automated payment ledger and reconciliation layer for a hospital finance team.',
+    bench: ['dir1', 'srm1', 'sra1', 'a1', 'a2'],
+    deliverables: [
+      { id: 'd1', name: 'Project Management & Data Request', note: 'Kickoff, source-system access, extract requests', value: 10000, expect: ['associate'], forbid: ['partner_director'] },
+      { id: 'd2', name: 'Source Data Mapping & Extract', note: 'Field mapping, extract validation, data dictionary', value: 26000, expect: ['associate'], forbid: [] },
+      { id: 'd3', name: 'Ledger Logic Build & Automation', note: 'Rules engine, automation, edge-case handling', value: 38000, expect: ['manager', 'associate'], forbid: [] },
+      { id: 'd4', name: 'Reconciliation Dashboard & Handoff', note: 'BI dashboard, run-book, team handoff', value: 21000, expect: ['manager', 'associate'], forbid: [] }
+    ] },
+  { id: 'e3', name: 'Connect & Cover', division: 'ops', status: 'estimate', value: 68000,
+    desc: 'Design a coverage and staffing model to close operational gaps across service lines.',
+    bench: ['srm1', 'mgr1', 'sra1', 'a1', 'a2'],
+    deliverables: [
+      { id: 'd1', name: 'Project Management & Coordination', note: 'Kickoff, stakeholder scheduling, status', value: 9000, expect: ['associate'], forbid: ['partner_director'] },
+      { id: 'd2', name: 'Coverage Gap Assessment', note: 'Current-state coverage, gap inventory, demand data', value: 20000, expect: ['associate'], forbid: [] },
+      { id: 'd3', name: 'Staffing & Coverage Model Design', note: 'Model design, scenarios, cost impact', value: 24000, expect: ['manager', 'associate'], forbid: [] },
+      { id: 'd4', name: 'Ops Playbook & Rollout', note: 'Playbook, rollout plan, manager enablement', value: 15000, expect: ['manager', 'associate'], forbid: [] }
+    ] },
+  { id: 'e4', name: 'HR', division: 'sg', status: 'estimate', value: 85000,
+    desc: 'Targeted HR transformation: org design, total rewards, and an HRIS roadmap for a mid-size health system.',
+    bench: ['dir1', 'srm1', 'sra1', 'a1', 'a2'],
+    deliverables: [
+      { id: 'd1', name: 'Project Management & Change Governance', note: 'PMO, comms, steering committee', value: 10000, expect: ['associate'], forbid: ['partner_director'] },
+      { id: 'd2', name: 'Org Design & Span Analysis', note: 'Span of control, layer optimization, role rationalization', value: 30000, expect: ['partner_director', 'associate'], forbid: [] },
+      { id: 'd3', name: 'Total Rewards Review', note: 'Comp benchmarking, benefits, pay equity', value: 25000, expect: ['manager', 'associate'], forbid: [] },
+      { id: 'd4', name: 'HRIS Strategy & Roadmap', note: 'System assessment, future-state, transition plan', value: 20000, expect: ['manager'], forbid: [] }
+    ] },
+  { id: 'e5', name: 'iCFO', division: 'finance', status: 'estimate', value: 140000,
+    desc: 'Embedded interim CFO engagement: liquidity, close and controls, and board/lender reporting.',
+    bench: ['md1', 'srm1', 'mgr1', 'sra1', 'a1'],
+    deliverables: [
+      { id: 'd1', name: 'Project Management & Reporting Cadence', note: 'Cadence, tracker, stakeholder coordination', value: 12000, expect: ['associate'], forbid: ['partner_director'] },
+      { id: 'd2', name: 'Cash & Liquidity Management', note: '13-week cash flow, liquidity decisions, lender posture', value: 44000, expect: ['partner_director'], forbid: [] },
+      { id: 'd3', name: 'Financial Close & Controls', note: 'Close acceleration, controls remediation', value: 46000, expect: ['manager', 'associate'], forbid: [] },
+      { id: 'd4', name: 'Board & Lender Reporting', note: 'Board deck, lender package, covenant narrative', value: 38000, expect: ['partner_director', 'associate'], forbid: [] }
+    ] },
+  { id: 'e6', name: 'Medicare Bloom', division: 'vq', status: 'sample', value: 6000,
+    desc: 'Help a multispecialty clinic complete CMS Medicare enrollment for a new service line. (Sample data — swap in the real contract.)',
+    bench: ['dir1', 'srm1', 'sra1', 'a1', 'a2'],
+    deliverables: [
+      { id: 'd1', name: 'Project Management', note: 'Kickoff, status, doc tracking, coordination', value: 900, expect: ['associate'], forbid: ['partner_director'] },
+      { id: 'd2', name: 'Provider Enrollment Forms (CMS-855)', note: 'Form prep, attestations, NPI/PECOS, supporting docs', value: 2100, expect: ['associate'], forbid: [] },
+      { id: 'd3', name: 'Compliance Review & Enrollment Strategy', note: 'CoP review, regulatory risk, strategic guidance', value: 1800, expect: ['partner_director', 'associate'], forbid: [] },
+      { id: 'd4', name: 'Submission Packet & State Coordination', note: 'Packet assembly, FI submission, state Medicaid coordination', value: 1200, expect: ['associate'], forbid: [] }
+    ] },
+  { id: 'e7', name: 'iCEO', division: 'catchall', status: 'estimate', value: 160000,
+    desc: 'Embedded interim CEO engagement: turnaround diagnostic, board management, and operational stabilization.',
+    bench: ['p1', 'srm1', 'mgr1', 'sra1', 'a1'],
+    deliverables: [
+      { id: 'd1', name: 'Project Management & Office of the CEO', note: 'Executive coordination, cadence, tracking', value: 14000, expect: ['associate'], forbid: ['partner_director'] },
+      { id: 'd2', name: 'Turnaround Diagnostic', note: 'Rapid diagnostic, value drivers, risk map', value: 40000, expect: ['partner_director', 'associate'], forbid: [] },
+      { id: 'd3', name: 'Stakeholder & Board Management', note: 'Board alignment, key-stakeholder strategy', value: 46000, expect: ['partner_director'], forbid: [] },
+      { id: 'd4', name: 'Operational Stabilization Plan', note: 'Stabilization roadmap, quick wins, owner map', value: 60000, expect: ['manager', 'associate'], forbid: [] }
+    ] }
+];
+
+const fmt = n => '$' + Math.round(n).toLocaleString();
+
+// ---- HOME ----
+const STATUS_BADGE = {
+  sample:   '<span class="status sample">Sample</span>',
+  estimate: '<span class="status estimate">Estimated</span>',
+  needed:   '<span class="status needed">Contract needed</span>'
+};
+function renderHome() {
+  const ready = ENGAGEMENTS.filter(e => e.status !== 'needed').length;
+  document.getElementById('engStatus').textContent = `${ready} of ${ENGAGEMENTS.length} boards ready · figures are estimates`;
+  document.getElementById('engGrid').innerHTML = ENGAGEMENTS.map(e => {
+    const div = DIVISIONS[e.division];
+    const loaded = e.status !== 'needed';
+    const statusHtml = STATUS_BADGE[e.status] || STATUS_BADGE.needed;
+    return `<div class="eng-card ${loaded ? '' : 'locked'}" data-eng="${e.id}" style="--div-color:${div.color}">
+      <div>
+        <div class="eng-name">${e.name}</div>
+        <div class="eng-div">${div.label}</div>
+      </div>
+      <div class="eng-foot">${statusHtml}${loaded ? '<span class="eng-go">Open →</span>' : ''}</div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('.eng-card[data-eng]').forEach(card => {
+    card.addEventListener('click', () => {
+      const e = ENGAGEMENTS.find(x => x.id === card.dataset.eng);
+      if (e && e.status !== 'needed') openBoard(e);
+    });
+  });
+
+  document.getElementById('firmCount').textContent = `${FIRM.length} on staff`;
+  document.getElementById('firmGrid').innerHTML = FIRM.map(c =>
+    `<div class="firm-card tier-${c.tier}">
+      <div class="firm-name">${c.name}</div>
+      <div class="firm-role"><span>${c.role}</span><span class="firm-rate">$${c.rate}/hr</span></div>
+    </div>`).join('');
+}
+
+// ---- BOARD ----
+let current = null;              // active engagement
+const assign = {};               // firmCharId -> deliverableId
+let picked = null;
+
+function benchFor(e) { return (e.bench || []).map(firmById); }
+function assignedTo(delivId) { return benchFor(current).filter(c => assign[c.id] === delivId); }
+
+function openBoard(e) {
+  current = e;
+  Object.keys(assign).forEach(k => delete assign[k]);
+  picked = null;
+  const div = DIVISIONS[e.division];
+  document.getElementById('bName').textContent = e.name;
+  document.getElementById('bDiv').textContent = div.label;
+  document.getElementById('bDiv').style.setProperty('--div-color', div.color);
+  document.getElementById('bDesc').textContent = e.desc || '';
+  document.getElementById('bValue').textContent = fmt(e.value || 0);
+  document.getElementById('home').classList.add('hidden');
+  document.getElementById('board').classList.remove('hidden');
+  renderBench(); renderDelivs();
+  window.scrollTo({ top: 0 });
+}
+
+function renderBench() {
+  const bench = benchFor(current);
+  document.getElementById('benchCount').textContent = bench.filter(c => !assign[c.id]).length + ' free';
+  document.getElementById('benchList').innerHTML = bench.map(c => {
+    const placed = !!assign[c.id];
+    return `<div class="char tier-${c.tier} ${placed ? 'placed' : ''} ${picked === c.id ? 'picked' : ''}"
+                 draggable="${!placed}" data-char="${c.id}">
+      <div class="char-name">${c.name}</div>
+      <div class="char-role"><span>${c.role} · ${TIER[c.tier].short}</span><span class="char-rate">$${c.rate}/hr</span></div>
+    </div>`;
+  }).join('');
+  wireBench();
+}
+
+function renderDelivs() {
+  let placed = 0;
+  document.getElementById('delivs').innerHTML = current.deliverables.map(d => {
+    const people = assignedTo(d.id);
+    placed += people.length;
+    const chips = people.map(c => `<span class="chip tier-${c.tier}">${c.name.split(' ')[0]} · ${TIER[c.tier].short}
+      <button data-remove="${c.id}" title="Remove">×</button></span>`).join('');
+    return `<div class="deliv" data-deliv="${d.id}">
+      <div class="deliv-top"><div class="deliv-name">${d.name}</div><div class="deliv-val">${fmt(d.value)}</div></div>
+      <div class="deliv-note">${d.note}</div>
+      <div class="slots ${people.length === 0 ? 'empty' : ''}" data-slot="${d.id}">${chips}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('assignedCount').textContent = placed + ' of ' + benchFor(current).length + ' placed';
+  wireDelivs();
+}
+
+function place(charId, delivId) { assign[charId] = delivId; picked = null; renderBench(); renderDelivs(); }
+function unplace(charId) { delete assign[charId]; renderBench(); renderDelivs(); }
+
+function wireBench() {
+  document.querySelectorAll('.char[draggable="true"]').forEach(el => {
+    el.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', el.dataset.char));
+    el.addEventListener('click', () => { picked = (picked === el.dataset.char) ? null : el.dataset.char; renderBench(); });
+  });
+}
+function wireDelivs() {
+  document.querySelectorAll('.slots').forEach(slot => {
+    const delivId = slot.dataset.slot;
+    slot.addEventListener('dragover', e => { e.preventDefault(); slot.closest('.deliv').classList.add('drop-hot'); });
+    slot.addEventListener('dragleave', () => slot.closest('.deliv').classList.remove('drop-hot'));
+    slot.addEventListener('drop', e => {
+      e.preventDefault(); slot.closest('.deliv').classList.remove('drop-hot');
+      const charId = e.dataTransfer.getData('text/plain');
+      if (charId) place(charId, delivId);
+    });
+  });
+  document.querySelectorAll('.deliv').forEach(d => {
+    d.addEventListener('click', e => { if (e.target.closest('.chip')) return; if (picked) place(picked, d.dataset.deliv); });
+  });
+  document.querySelectorAll('[data-remove]').forEach(b => {
+    b.addEventListener('click', e => { e.stopPropagation(); unplace(b.dataset.remove); });
+  });
+}
+
+// ---- Scoring: role-fit, value-weighted ----
+function bestHomeFor(tier) {
+  const d = current.deliverables.find(x => x.expect.includes(tier));
+  return d ? d.name : 'a deliverable that needs that level';
+}
+function scoreStaffing() {
+  const total = current.value || current.deliverables.reduce((s, d) => s + d.value, 0);
+  let weighted = 0;
+  const notes = { good: [], bad: [], warn: [] };
+  current.deliverables.forEach(d => {
+    const people = assignedTo(d.id);
+    const tiers = new Set(people.map(c => c.tier));
+    let s = 1;
+    d.expect.forEach(t => {
+      if (!tiers.has(t)) {
+        s -= 0.5;
+        if (people.length === 0) notes.bad.push(`${d.name} is unstaffed — it needs ${TIER[t].label} presence.`);
+        else notes.warn.push(`${d.name} has no ${TIER[t].label} on it — that's the level this work turns on.`);
+      }
+    });
+    people.forEach(c => {
+      if (d.forbid.includes(c.tier)) {
+        s -= 0.6;
+        notes.bad.push(`${c.name} (${c.role}) is on ${d.name} — that's analyst execution. ${c.name.split(' ')[0]} belongs on ${bestHomeFor(c.tier)}.`);
+      }
+    });
+    const maxExpectRank = Math.max(0, ...d.expect.map(t => TIER[t].rank));
+    people.forEach(c => {
+      if (!d.forbid.includes(c.tier) && !d.expect.includes(c.tier) && TIER[c.tier].rank > maxExpectRank) {
+        s -= 0.3;
+        notes.warn.push(`${c.name} (${c.role}) on ${d.name} is heavier than the work needs — a lower level protects the margin.`);
+      }
+    });
+    d.expect.forEach(t => {
+      if (TIER[t].rank >= 2 && tiers.has(t)) {
+        const who = people.find(c => c.tier === t);
+        notes.good.push(`${who.name} on ${d.name} is exactly right — senior work, senior person.`);
+      }
+    });
+    weighted += (d.value / total) * Math.max(0, s);
+  });
+  const benched = benchFor(current).filter(c => !assign[c.id]);
+  return { score: Math.round(weighted * 100), notes, benched };
+}
+
+function showResult() {
+  const { score, notes, benched } = scoreStaffing();
+  document.getElementById('resScore').textContent = score + ' / 100';
+  document.getElementById('resTitle').textContent =
+    score >= 90 ? 'Sharp staffing.' : score >= 70 ? 'Solid draft.' : score >= 50 ? 'Workable, with gaps.' : 'The mix needs a rethink.';
+  document.getElementById('resHeadline').textContent =
+    score >= 90 ? 'You put your people where they earn their keep.'
+    : notes.bad.length ? 'A couple of people are on the wrong work — that\'s the fix.'
+    : 'Close — tighten who sits where.';
+  const bullets = [];
+  notes.bad.slice(0, 3).forEach(t => bullets.push(['bad', t]));
+  notes.warn.slice(0, 2).forEach(t => bullets.push(['warn', t]));
+  if (benched.length) bullets.push(['warn', `${benched.map(c => c.name.split(' ')[0]).join(', ')} left on the bench — make sure that's deliberate, not a gap.`]);
+  notes.good.slice(0, 2).forEach(t => bullets.push(['good', t]));
+  document.getElementById('resBullets').innerHTML =
+    bullets.map(([cls, t]) => `<li class="${cls}">${t}</li>`).join('') || '<li class="good">Every deliverable is staffed at the right level. Clean.</li>';
+  document.getElementById('overlay').classList.add('show');
+}
+
+document.getElementById('backBtn').addEventListener('click', () => {
+  document.getElementById('board').classList.add('hidden');
+  document.getElementById('home').classList.remove('hidden');
+});
+document.getElementById('scoreBtn').addEventListener('click', showResult);
+document.getElementById('clearBtn').addEventListener('click', () => { Object.keys(assign).forEach(k => delete assign[k]); picked = null; renderBench(); renderDelivs(); });
+document.getElementById('resClose').addEventListener('click', () => document.getElementById('overlay').classList.remove('show'));
+document.getElementById('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') e.currentTarget.classList.remove('show'); });
+
+renderHome();
+</script>
+</body>
+</html>
