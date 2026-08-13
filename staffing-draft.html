@@ -48,14 +48,24 @@
   .eng-go { font-size:12px; font-weight:700; color:var(--ink-3); }
 
   /* ---- Firm bench roster ---- */
-  .firm-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; }
+  .firm-grid { display:flex; flex-direction:column; gap:18px; }
+  .firm-div-group { display:flex; flex-direction:column; gap:8px; }
+  .firm-div-head { font-size:12px; font-weight:800; color:var(--div-color,#555); display:flex; align-items:center; gap:6px; }
+  .firm-div-head::before { content:''; width:8px; height:8px; border-radius:50%; background:var(--div-color,#999); }
+  .firm-div-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; }
   .firm-card { background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--assoc); border-radius:var(--r-md); padding:10px 12px; }
   .firm-card.tier-partner_director { border-left-color:var(--senior); }
   .firm-card.tier-manager { border-left-color:var(--mid); }
   .firm-card.tier-associate { border-left-color:var(--assoc); }
-  .firm-name { font-weight:700; font-size:14px; }
-  .firm-role { font-size:11.5px; color:var(--ink-2); display:flex; justify-content:space-between; margin-top:1px; }
-  .firm-rate { font-family:'JetBrains Mono',monospace; color:var(--ink-3); }
+  .firm-name { font-weight:700; font-size:14px; margin-bottom:5px; }
+  .firm-meta { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+  .firm-rate { font-family:'JetBrains Mono',monospace; color:var(--ink-3); font-size:11.5px; }
+
+  /* ---- Role badge — used on firm cards, bench cards, and assignment rows ---- */
+  .role-badge { display:inline-block; font-size:10.5px; font-weight:800; text-transform:uppercase; letter-spacing:0.02em; padding:3px 8px; border-radius:var(--r-full); background:var(--assoc-soft); color:var(--assoc); }
+  .role-badge.tier-partner_director { background:var(--senior-soft); color:var(--senior); }
+  .role-badge.tier-manager { background:var(--mid-soft); color:var(--mid); }
+  .role-badge.tier-associate { background:var(--assoc-soft); color:var(--assoc); }
 
   /* ---- Board view ---- */
   .hidden { display:none !important; }
@@ -79,9 +89,15 @@
   .char.tier-associate { border-left-color:var(--assoc); }
   .char.picked { outline:2px solid var(--p1); outline-offset:1px; }
   .char.placed { opacity:.35; pointer-events:none; }
-  .char-name { font-weight:700; font-size:14px; }
-  .char-role { font-size:11.5px; color:var(--ink-2); display:flex; justify-content:space-between; margin-top:1px; }
-  .char-rate { font-family:'JetBrains Mono',monospace; color:var(--ink-3); }
+  .char-name { font-weight:700; font-size:14px; margin-bottom:5px; }
+  .char-meta { display:flex; align-items:center; justify-content:space-between; gap:6px; }
+  .char-rate { font-family:'JetBrains Mono',monospace; color:var(--ink-3); font-size:11.5px; }
+  .guest-tag { display:flex; align-items:center; gap:6px; margin-top:7px; font-size:10.5px; font-weight:700; color:var(--div-color,#555); }
+  .guest-tag::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--div-color,#999); }
+  .guest-tag button { border:none; background:var(--line); color:var(--ink-2); width:15px; height:15px; border-radius:50%; cursor:pointer; font-size:10px; line-height:1; margin-left:auto; }
+  .guest-tag button:hover { background:var(--bad); color:#fff; }
+  .cross-btn { width:100%; margin-top:10px; font-size:12.5px; padding:9px 12px; background:var(--surface-2); border-style:dashed; }
+  .cross-btn:hover { background:var(--p1-soft); border-color:var(--p1); color:var(--p1-deep); }
   .delivs { display:flex; flex-direction:column; gap:14px; }
   .deliv { background:var(--surface); border:1px solid var(--line); border-radius:var(--r-md); padding:14px 16px; transition:border-color .12s, background .12s; }
   .deliv.drop-hot { border-color:var(--p1); background:var(--p1-soft); }
@@ -102,9 +118,9 @@
   .arow.tier-partner_director { border-left-color:var(--senior); }
   .arow.tier-manager { border-left-color:var(--mid); }
   .arow.tier-associate { border-left-color:var(--assoc); }
-  .arow-who { flex:1; min-width:0; }
+  .arow-who { flex:1; min-width:0; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
   .arow-name { font-weight:700; font-size:13.5px; }
-  .arow-role { display:block; font-size:11px; color:var(--ink-3); }
+  .arow-rate { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--ink-3); }
   .arow-hrs { display:flex; align-items:center; gap:3px; }
   .arow-hrs button { width:24px; height:28px; border:1px solid var(--line-2); background:var(--surface-2); border-radius:6px; cursor:pointer; font-size:15px; line-height:1; }
   .arow-hrs button:hover { background:var(--line); }
@@ -130,6 +146,19 @@
   .review li.good::before { background:var(--good); }
   .review li.bad::before { background:var(--bad); }
   .review li.warn::before { background:var(--warn); }
+
+  /* ---- Cross-division picker ---- */
+  .cross-modal { max-width:600px; }
+  .cross-sub { font-size:13px; color:var(--ink-2); margin:2px 0 16px; }
+  .cross-div-group { margin-bottom:16px; }
+  .cross-div-group:last-child { margin-bottom:0; }
+  .cross-div-head { font-size:11.5px; font-weight:800; color:var(--div-color,#555); display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+  .cross-div-head::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--div-color,#999); }
+  .cross-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:7px 4px; border-bottom:1px solid var(--line); }
+  .cross-row:last-child { border-bottom:none; }
+  .cross-who { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .cross-name { font-weight:700; font-size:13.5px; }
+  .cross-row .btn { padding:6px 12px; font-size:12.5px; }
 </style>
 </head>
 <body>
@@ -166,6 +195,7 @@
       <div class="bench">
         <div class="panel-head"><span>Bench for this engagement</span><span id="benchCount"></span></div>
         <div class="bench-list" id="benchList"></div>
+        <button class="btn cross-btn" id="crossBtn">+ Pull in cross-division support</button>
       </div>
       <div>
         <div class="panel-head"><span>Deliverables</span><span id="assignedCount"></span></div>
@@ -189,6 +219,15 @@
       <ul id="resBullets"></ul>
     </div>
     <div class="actions"><button class="btn primary" id="resClose">Keep adjusting</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="crossOverlay">
+  <div class="result cross-modal">
+    <h2>Pull in cross-division support</h2>
+    <div class="cross-sub">Borrow someone from another division for crossover work on this engagement. They join your bench for this session only.</div>
+    <div id="crossList"></div>
+    <div class="actions"><button class="btn primary" id="crossClose">Done</button></div>
   </div>
 </div>
 
@@ -218,18 +257,61 @@ const DIVISIONS = {
   catchall: { label: 'Catch All',color: '#64748b' }
 };
 
-// The firm bench — random names mapped to the real roles + rates.
+// The firm bench — one roster per division, each spanning senior/mid/analyst.
+// Names lean eclectic on purpose (earnest-coach energy to big-presence-icon
+// energy to cartoon-whimsy energy) without using verbatim celebrity or
+// copyrighted-character names. `division` is each person's home team; the
+// board defaults to a division's own roster, with cross-division pull-in
+// as the explicit exception for crossover work.
 const FIRM = [
-  { id: 'p1',   name: 'Adrian Thorne',    role: 'Partner',      tier: 'partner_director', rate: 495 },
-  { id: 'md1',  name: 'Vivian Reyes',     role: 'Mng Dir',      tier: 'partner_director', rate: 465 },
-  { id: 'srd1', name: 'Marcus Alderton',  role: 'Sr Dir',       tier: 'partner_director', rate: 420 },
-  { id: 'dir1', name: 'Cassian Vale',     role: 'Director',     tier: 'partner_director', rate: 355 },
-  { id: 'srm1', name: 'Odette Brandt',    role: 'Sr Mgr',       tier: 'manager',          rate: 295 },
-  { id: 'mgr1', name: 'Declan Ross',      role: 'Manager',      tier: 'manager',          rate: 265 },
-  { id: 'sra1', name: 'Pia Novak',        role: 'Sr Associate', tier: 'associate',        rate: 175 },
-  { id: 'sra2', name: 'Theo Lindqvist',   role: 'Sr Associate', tier: 'associate',        rate: 175 },
-  { id: 'a1',   name: 'Milo Frost',       role: 'Associate',    tier: 'associate',        rate: 145 },
-  { id: 'a2',   name: 'Reya Okonkwo',     role: 'Associate',    tier: 'associate',        rate: 145 }
+  // Clin Ops — earnest coach/mentor energy
+  { id: 'co-dir', name: 'Coach Beau Halloway', role: 'Director',     tier: 'partner_director', rate: 355, division: 'clinops' },
+  { id: 'co-srm', name: 'Roy Kincaid',         role: 'Sr Mgr',       tier: 'manager',          rate: 295, division: 'clinops' },
+  { id: 'co-sra', name: 'Keeley Marsh',        role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'clinops' },
+  { id: 'co-a1',  name: 'Nate Foley',          role: 'Associate',    tier: 'associate',        rate: 145, division: 'clinops' },
+  { id: 'co-a2',  name: 'Dani Osei',           role: 'Associate',    tier: 'associate',        rate: 145, division: 'clinops' },
+
+  // BI — sharp data/tech energy
+  { id: 'bi-srd', name: 'Ada Kessler',         role: 'Sr Dir',       tier: 'partner_director', rate: 420, division: 'bi' },
+  { id: 'bi-srm', name: 'Quinn Baptiste',      role: 'Sr Mgr',       tier: 'manager',          rate: 295, division: 'bi' },
+  { id: 'bi-sr1', name: 'Percy Nakamura',      role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'bi' },
+  { id: 'bi-sr2', name: 'Lena Ostrowski',      role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'bi' },
+  { id: 'bi-a1',  name: 'Jamal Fitch',         role: 'Associate',    tier: 'associate',        rate: 145, division: 'bi' },
+
+  // Ops — logistics-general energy
+  { id: 'ops-dir', name: 'General Talia Ferro', role: 'Director',     tier: 'partner_director', rate: 355, division: 'ops' },
+  { id: 'ops-srm', name: 'Hank Osei',           role: 'Sr Mgr',       tier: 'manager',          rate: 295, division: 'ops' },
+  { id: 'ops-mgr', name: 'Priya Malhotra',      role: 'Manager',      tier: 'manager',          rate: 265, division: 'ops' },
+  { id: 'ops-sra', name: 'Diego Farrow',        role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'ops' },
+  { id: 'ops-a1',  name: 'Naomi Voss',          role: 'Associate',    tier: 'associate',        rate: 145, division: 'ops' },
+
+  // S&G (HR/People) — big-presence, warm media energy
+  { id: 'sg-md',  name: 'Coretta Wynn',        role: 'Mng Dir',      tier: 'partner_director', rate: 465, division: 'sg' },
+  { id: 'sg-srm', name: 'Harold Byrne',        role: 'Sr Mgr',       tier: 'manager',          rate: 295, division: 'sg' },
+  { id: 'sg-sra', name: 'Simone Vantrease',    role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'sg' },
+  { id: 'sg-a1',  name: 'Miles Okafor',        role: 'Associate',    tier: 'associate',        rate: 145, division: 'sg' },
+  { id: 'sg-a2',  name: 'Fiona Castellano',    role: 'Associate',    tier: 'associate',        rate: 145, division: 'sg' },
+
+  // Finance — buttoned-up numbers energy
+  { id: 'fin-md', name: 'Vivian Reyes',        role: 'Mng Dir',      tier: 'partner_director', rate: 465, division: 'finance' },
+  { id: 'fin-srm', name: 'Franklin Dietz',     role: 'Sr Mgr',       tier: 'manager',          rate: 295, division: 'finance' },
+  { id: 'fin-mgr', name: 'Grace Halloran',     role: 'Manager',      tier: 'manager',          rate: 265, division: 'finance' },
+  { id: 'fin-sra', name: 'Owen Petrakis',      role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'finance' },
+  { id: 'fin-a1',  name: 'Bianca Solheim',     role: 'Associate',    tier: 'associate',        rate: 145, division: 'finance' },
+
+  // V&Q — sharp-eyed quality/compliance energy (Medicare Bloom's original cast)
+  { id: 'vq-dir', name: 'Cassian Vale',        role: 'Director',     tier: 'partner_director', rate: 355, division: 'vq' },
+  { id: 'vq-srm', name: 'Odette Brandt',       role: 'Sr Mgr',       tier: 'manager',          rate: 295, division: 'vq' },
+  { id: 'vq-sra', name: 'Pia Novak',           role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'vq' },
+  { id: 'vq-a1',  name: 'Milo Frost',          role: 'Associate',    tier: 'associate',        rate: 145, division: 'vq' },
+  { id: 'vq-a2',  name: 'Reya Okonkwo',        role: 'Associate',    tier: 'associate',        rate: 145, division: 'vq' },
+
+  // Catch All — zany, cartoon-whimsy energy
+  { id: 'ca-p',   name: 'Adrian Thorne',       role: 'Partner',      tier: 'partner_director', rate: 495, division: 'catchall' },
+  { id: 'ca-srm', name: 'Duke Feathersby',     role: 'Sr Mgr',       tier: 'manager',          rate: 295, division: 'catchall' },
+  { id: 'ca-mgr', name: 'Mona Quackenbush',    role: 'Manager',      tier: 'manager',          rate: 265, division: 'catchall' },
+  { id: 'ca-sra', name: 'Chip Renwick',        role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'catchall' },
+  { id: 'ca-a1',  name: 'Wally Pemberton',     role: 'Associate',    tier: 'associate',        rate: 145, division: 'catchall' }
 ];
 const firmById = id => FIRM.find(c => c.id === id);
 
@@ -241,7 +323,6 @@ const firmById = id => FIRM.find(c => c.id === id);
 const ENGAGEMENTS = [
   { id: 'e1', name: 'CalAIM', division: 'clinops', status: 'estimate', value: 120000,
     desc: 'Stand up an Enhanced Care Management (ECM) and Community Supports program under CalAIM for a Medi-Cal managed care population.',
-    bench: ['srd1', 'srm1', 'sra1', 'a1', 'a2'],
     deliverables: [
       { id: 'd1', name: 'Project Management & Coordination', note: 'Kickoff, status, DHCS deadline tracking', value: 12000, expect: ['associate'], forbid: ['partner_director'] },
       { id: 'd2', name: 'ECM Eligibility & Population Analysis', note: 'Tiering, target population sizing, data pulls', value: 34000, expect: ['associate'], forbid: [] },
@@ -250,7 +331,6 @@ const ENGAGEMENTS = [
     ] },
   { id: 'e2', name: 'Ledger', division: 'bi', status: 'estimate', value: 95000,
     desc: 'Build an automated payment ledger and reconciliation layer for a hospital finance team.',
-    bench: ['dir1', 'srm1', 'sra1', 'a1', 'a2'],
     deliverables: [
       { id: 'd1', name: 'Project Management & Data Request', note: 'Kickoff, source-system access, extract requests', value: 10000, expect: ['associate'], forbid: ['partner_director'] },
       { id: 'd2', name: 'Source Data Mapping & Extract', note: 'Field mapping, extract validation, data dictionary', value: 26000, expect: ['associate'], forbid: [] },
@@ -259,7 +339,6 @@ const ENGAGEMENTS = [
     ] },
   { id: 'e3', name: 'Connect & Cover', division: 'ops', status: 'estimate', value: 68000,
     desc: 'Design a coverage and staffing model to close operational gaps across service lines.',
-    bench: ['srm1', 'mgr1', 'sra1', 'a1', 'a2'],
     deliverables: [
       { id: 'd1', name: 'Project Management & Coordination', note: 'Kickoff, stakeholder scheduling, status', value: 9000, expect: ['associate'], forbid: ['partner_director'] },
       { id: 'd2', name: 'Coverage Gap Assessment', note: 'Current-state coverage, gap inventory, demand data', value: 20000, expect: ['associate'], forbid: [] },
@@ -268,7 +347,6 @@ const ENGAGEMENTS = [
     ] },
   { id: 'e4', name: 'HR', division: 'sg', status: 'estimate', value: 85000,
     desc: 'Targeted HR transformation: org design, total rewards, and an HRIS roadmap for a mid-size health system.',
-    bench: ['dir1', 'srm1', 'sra1', 'a1', 'a2'],
     deliverables: [
       { id: 'd1', name: 'Project Management & Change Governance', note: 'PMO, comms, steering committee', value: 10000, expect: ['associate'], forbid: ['partner_director'] },
       { id: 'd2', name: 'Org Design & Span Analysis', note: 'Span of control, layer optimization, role rationalization', value: 30000, expect: ['partner_director', 'associate'], forbid: [] },
@@ -277,7 +355,6 @@ const ENGAGEMENTS = [
     ] },
   { id: 'e5', name: 'iCFO', division: 'finance', status: 'estimate', value: 140000,
     desc: 'Embedded interim CFO engagement: liquidity, close and controls, and board/lender reporting.',
-    bench: ['md1', 'srm1', 'mgr1', 'sra1', 'a1'],
     deliverables: [
       { id: 'd1', name: 'Project Management & Reporting Cadence', note: 'Cadence, tracker, stakeholder coordination', value: 12000, expect: ['associate'], forbid: ['partner_director'] },
       { id: 'd2', name: 'Cash & Liquidity Management', note: '13-week cash flow, liquidity decisions, lender posture', value: 44000, expect: ['partner_director'], forbid: [] },
@@ -286,7 +363,6 @@ const ENGAGEMENTS = [
     ] },
   { id: 'e6', name: 'Medicare Bloom', division: 'vq', status: 'sample', value: 6000,
     desc: 'Help a multispecialty clinic complete CMS Medicare enrollment for a new service line. (Sample data — swap in the real contract.)',
-    bench: ['dir1', 'srm1', 'sra1', 'a1', 'a2'],
     deliverables: [
       { id: 'd1', name: 'Project Management', note: 'Kickoff, status, doc tracking, coordination', value: 900, expect: ['associate'], forbid: ['partner_director'] },
       { id: 'd2', name: 'Provider Enrollment Forms (CMS-855)', note: 'Form prep, attestations, NPI/PECOS, supporting docs', value: 2100, expect: ['associate'], forbid: [] },
@@ -295,7 +371,6 @@ const ENGAGEMENTS = [
     ] },
   { id: 'e7', name: 'iCEO', division: 'catchall', status: 'estimate', value: 160000,
     desc: 'Embedded interim CEO engagement: turnaround diagnostic, board management, and operational stabilization.',
-    bench: ['p1', 'srm1', 'mgr1', 'sra1', 'a1'],
     deliverables: [
       { id: 'd1', name: 'Project Management & Office of the CEO', note: 'Executive coordination, cadence, tracking', value: 14000, expect: ['associate'], forbid: ['partner_director'] },
       { id: 'd2', name: 'Turnaround Diagnostic', note: 'Rapid diagnostic, value drivers, risk map', value: 40000, expect: ['partner_director', 'associate'], forbid: [] },
@@ -335,27 +410,47 @@ function renderHome() {
   });
 
   document.getElementById('firmCount').textContent = `${FIRM.length} on staff`;
-  document.getElementById('firmGrid').innerHTML = FIRM.map(c =>
-    `<div class="firm-card tier-${c.tier}">
-      <div class="firm-name">${c.name}</div>
-      <div class="firm-role"><span>${c.role}</span><span class="firm-rate">$${c.rate}/hr</span></div>
-    </div>`).join('');
+  document.getElementById('firmGrid').innerHTML = Object.keys(DIVISIONS).map(divKey => {
+    const div = DIVISIONS[divKey];
+    const people = FIRM.filter(c => c.division === divKey);
+    return `<div class="firm-div-group">
+      <div class="firm-div-head" style="--div-color:${div.color}">${div.label}</div>
+      <div class="firm-div-cards">
+        ${people.map(c => `<div class="firm-card tier-${c.tier}">
+          <div class="firm-name">${c.name}</div>
+          <div class="firm-meta">${roleBadge(c)}<span class="firm-rate">$${c.rate}/hr</span></div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
 }
 
 // ---- BOARD ----
 let current = null;              // active engagement
 const assign = {};               // firmCharId -> { deliv, hrs }
 let picked = null;
+let crossIn = [];                // firmCharIds pulled in from other divisions, for this board session
 
-function benchFor(e) { return (e.bench || []).map(firmById); }
+// A division's bench is its own roster plus anyone pulled in for the session.
+function benchFor(e) {
+  const home = FIRM.filter(c => c.division === e.division);
+  const guests = crossIn.map(firmById).filter(Boolean);
+  return home.concat(guests);
+}
 function assignedTo(delivId) { return benchFor(current).filter(c => assign[c.id] && assign[c.id].deliv === delivId); }
 function hrsOf(charId) { return assign[charId] ? assign[charId].hrs : 0; }
 function delivCost(delivId) { return assignedTo(delivId).reduce((s, c) => s + c.rate * hrsOf(c.id), 0); }
+
+// Role badge — title + tier, styled as a small pill so it reads at a glance.
+function roleBadge(c) {
+  return `<span class="role-badge tier-${c.tier}">${c.role}</span>`;
+}
 
 function openBoard(e) {
   current = e;
   Object.keys(assign).forEach(k => delete assign[k]);
   picked = null;
+  crossIn = [];
   const div = DIVISIONS[e.division];
   document.getElementById('bName').textContent = e.name;
   document.getElementById('bDiv').textContent = div.label;
@@ -373,10 +468,15 @@ function renderBench() {
   document.getElementById('benchCount').textContent = bench.filter(c => !assign[c.id]).length + ' free';
   document.getElementById('benchList').innerHTML = bench.map(c => {
     const placed = !!assign[c.id];
+    const isGuest = crossIn.includes(c.id);
+    const guestTag = isGuest
+      ? `<span class="guest-tag" style="--div-color:${DIVISIONS[c.division].color}">on loan · ${DIVISIONS[c.division].label}<button data-uncross="${c.id}" title="Send back">×</button></span>`
+      : '';
     return `<div class="char tier-${c.tier} ${placed ? 'placed' : ''} ${picked === c.id ? 'picked' : ''}"
                  draggable="${!placed}" data-char="${c.id}">
       <div class="char-name">${c.name}</div>
-      <div class="char-role"><span>${c.role} · ${TIER[c.tier].short}</span><span class="char-rate">$${c.rate}/hr</span></div>
+      <div class="char-meta">${roleBadge(c)}<span class="char-rate">$${c.rate}/hr</span></div>
+      ${guestTag}
     </div>`;
   }).join('');
   wireBench();
@@ -389,7 +489,7 @@ function renderDelivs() {
     placed += people.length;
     const rows = people.map(c => `
       <div class="arow tier-${c.tier}">
-        <div class="arow-who"><span class="arow-name">${c.name}</span><span class="arow-role">${c.role} · ${TIER[c.tier].short} · $${c.rate}/hr</span></div>
+        <div class="arow-who"><span class="arow-name">${c.name}</span>${roleBadge(c)}<span class="arow-rate">$${c.rate}/hr</span></div>
         <div class="arow-hrs">
           <button data-dhrs="-1" data-char="${c.id}">−</button>
           <input type="number" min="0" step="1" value="${hrsOf(c.id)}" data-char="${c.id}" aria-label="hours">
@@ -449,7 +549,50 @@ function budgetState(delivId) {
 function wireBench() {
   document.querySelectorAll('.char[draggable="true"]').forEach(el => {
     el.addEventListener('dragstart', e => e.dataTransfer.setData('text/plain', el.dataset.char));
-    el.addEventListener('click', () => { picked = (picked === el.dataset.char) ? null : el.dataset.char; renderBench(); });
+    el.addEventListener('click', e => {
+      if (e.target.closest('[data-uncross]')) return;
+      picked = (picked === el.dataset.char) ? null : el.dataset.char;
+      renderBench();
+    });
+  });
+  document.querySelectorAll('[data-uncross]').forEach(b => {
+    b.addEventListener('click', e => { e.stopPropagation(); sendBack(b.dataset.uncross); });
+  });
+}
+
+// ---- Cross-division pull-in ----
+function sendBack(charId) {
+  delete assign[charId];
+  crossIn = crossIn.filter(id => id !== charId);
+  renderBench(); renderDelivs();
+}
+function pullIn(charId) {
+  if (!crossIn.includes(charId)) crossIn.push(charId);
+  renderBench(); renderCrossPicker();
+}
+function openCrossPicker() {
+  renderCrossPicker();
+  document.getElementById('crossOverlay').classList.add('show');
+}
+function renderCrossPicker() {
+  const others = Object.keys(DIVISIONS).filter(k => k !== current.division);
+  document.getElementById('crossList').innerHTML = others.map(divKey => {
+    const div = DIVISIONS[divKey];
+    const people = FIRM.filter(c => c.division === divKey);
+    const rows = people.map(c => {
+      const added = crossIn.includes(c.id);
+      return `<div class="cross-row">
+        <div class="cross-who"><span class="cross-name">${c.name}</span>${roleBadge(c)}<span class="char-rate">$${c.rate}/hr</span></div>
+        <button class="btn ${added ? '' : 'primary'}" data-pull="${c.id}" ${added ? 'disabled' : ''}>${added ? 'Added ✓' : 'Add'}</button>
+      </div>`;
+    }).join('');
+    return `<div class="cross-div-group">
+      <div class="cross-div-head" style="--div-color:${div.color}">${div.label}</div>
+      ${rows}
+    </div>`;
+  }).join('');
+  document.querySelectorAll('[data-pull]').forEach(b => {
+    b.addEventListener('click', () => pullIn(b.dataset.pull));
   });
 }
 function wireDelivs() {
@@ -572,6 +715,9 @@ document.getElementById('scoreBtn').addEventListener('click', showResult);
 document.getElementById('clearBtn').addEventListener('click', () => { Object.keys(assign).forEach(k => delete assign[k]); picked = null; renderBench(); renderDelivs(); });
 document.getElementById('resClose').addEventListener('click', () => document.getElementById('overlay').classList.remove('show'));
 document.getElementById('overlay').addEventListener('click', e => { if (e.target.id === 'overlay') e.currentTarget.classList.remove('show'); });
+document.getElementById('crossBtn').addEventListener('click', openCrossPicker);
+document.getElementById('crossClose').addEventListener('click', () => document.getElementById('crossOverlay').classList.remove('show'));
+document.getElementById('crossOverlay').addEventListener('click', e => { if (e.target.id === 'crossOverlay') e.currentTarget.classList.remove('show'); });
 
 renderHome();
 </script>
