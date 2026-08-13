@@ -258,60 +258,58 @@ const DIVISIONS = {
 };
 
 // The firm bench — one roster per division, each spanning senior/mid/analyst.
-// Names are a deliberately random, non-thematic mix — no per-division bit,
-// no verbatim celebrity or copyrighted-character names, just a broad and
-// varied set of common names. `division` is each person's home team; the
-// board defaults to a division's own roster, with cross-division pull-in
-// as the explicit exception for crossover work.
+// `division` is each person's home team; the board defaults to a division's
+// own roster, with cross-division pull-in as the explicit exception for
+// crossover work.
 const FIRM = [
   // Clin Ops
-  { id: 'co-dir', name: 'Dennis Marlow',    role: 'Director',           tier: 'partner_director', rate: 355, division: 'clinops' },
-  { id: 'co-srm', name: 'Priya Anand',      role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'clinops' },
-  { id: 'co-sra', name: 'Walter Sandoval',  role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'clinops' },
-  { id: 'co-a1',  name: 'Odessa Fontaine',  role: 'Associate',          tier: 'associate',        rate: 145, division: 'clinops' },
-  { id: 'co-a2',  name: 'Marcus Doyle',     role: 'Associate',          tier: 'associate',        rate: 145, division: 'clinops' },
+  { id: 'co-dir', name: 'Ferris Bueller',   role: 'Director',           tier: 'partner_director', rate: 355, division: 'clinops' },
+  { id: 'co-srm', name: 'Marty McFly',      role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'clinops' },
+  { id: 'co-sra', name: 'Ron Burgundy',     role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'clinops' },
+  { id: 'co-a1',  name: 'Michael Scott',    role: 'Associate',          tier: 'associate',        rate: 145, division: 'clinops' },
+  { id: 'co-a2',  name: 'Dwight Schrute',   role: 'Associate',          tier: 'associate',        rate: 145, division: 'clinops' },
 
   // BI
-  { id: 'bi-srd', name: 'Renee Castillo',   role: 'Senior Director',    tier: 'partner_director', rate: 420, division: 'bi' },
-  { id: 'bi-srm', name: 'Booker Lindqvist', role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'bi' },
-  { id: 'bi-sr1', name: 'Naomi Sato',       role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'bi' },
-  { id: 'bi-sr2', name: 'Gareth Voss',      role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'bi' },
-  { id: 'bi-a1',  name: 'Camille Ashworth', role: 'Associate',          tier: 'associate',        rate: 145, division: 'bi' },
+  { id: 'bi-srd', name: 'Leslie Knope',     role: 'Senior Director',    tier: 'partner_director', rate: 420, division: 'bi' },
+  { id: 'bi-srm', name: 'Ron Swanson',      role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'bi' },
+  { id: 'bi-sr1', name: 'Liz Lemon',        role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'bi' },
+  { id: 'bi-sr2', name: 'Barney Stinson',   role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'bi' },
+  { id: 'bi-a1',  name: 'Don Draper',       role: 'Associate',          tier: 'associate',        rate: 145, division: 'bi' },
 
   // Ops
-  { id: 'ops-dir', name: 'Desmond Palladino', role: 'Director',         tier: 'partner_director', rate: 355, division: 'ops' },
-  { id: 'ops-srm', name: 'Ingrid Solberg',    role: 'Senior Manager',   tier: 'manager',          rate: 295, division: 'ops' },
-  { id: 'ops-mgr', name: 'Otis Farrow',       role: 'Manager',          tier: 'manager',          rate: 265, division: 'ops' },
-  { id: 'ops-sra', name: 'Bianca Marchetti',  role: 'Senior Associate', tier: 'associate',        rate: 175, division: 'ops' },
-  { id: 'ops-a1',  name: 'Cormac Whitfield',  role: 'Associate',        tier: 'associate',        rate: 145, division: 'ops' },
+  { id: 'ops-dir', name: 'Peggy Olson',     role: 'Director',           tier: 'partner_director', rate: 355, division: 'ops' },
+  { id: 'ops-srm', name: 'Walter White',    role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'ops' },
+  { id: 'ops-mgr', name: 'Tony Stark',      role: 'Manager',            tier: 'manager',          rate: 265, division: 'ops' },
+  { id: 'ops-sra', name: 'Bruce Wayne',     role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'ops' },
+  { id: 'ops-a1',  name: 'Clark Kent',      role: 'Associate',          tier: 'associate',        rate: 145, division: 'ops' },
 
   // S&G (HR/People)
-  { id: 'sg-md',  name: 'Adaeze Nnamdi',    role: 'Managing Director',  tier: 'partner_director', rate: 465, division: 'sg' },
-  { id: 'sg-srm', name: 'Sterling Boyce',   role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'sg' },
-  { id: 'sg-sra', name: 'Poppy Delacroix',  role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'sg' },
-  { id: 'sg-a1',  name: 'Rafael Okonkwo',   role: 'Associate',          tier: 'associate',        rate: 145, division: 'sg' },
-  { id: 'sg-a2',  name: 'Harriet Kowalski', role: 'Associate',          tier: 'associate',        rate: 145, division: 'sg' },
+  { id: 'sg-md',  name: 'Elle Woods',           role: 'Managing Director',  tier: 'partner_director', rate: 465, division: 'sg' },
+  { id: 'sg-srm', name: 'Sherlock Holmes',      role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'sg' },
+  { id: 'sg-sra', name: 'Hermione Granger',     role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'sg' },
+  { id: 'sg-a1',  name: 'Indiana Jones',        role: 'Associate',          tier: 'associate',        rate: 145, division: 'sg' },
+  { id: 'sg-a2',  name: 'Napoleon Dynamite',    role: 'Associate',          tier: 'associate',        rate: 145, division: 'sg' },
 
   // Finance
-  { id: 'fin-md', name: 'Django Renwick',   role: 'Managing Director',  tier: 'partner_director', rate: 465, division: 'finance' },
-  { id: 'fin-srm', name: 'Simone Baptiste', role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'finance' },
-  { id: 'fin-mgr', name: 'Felix Osei',      role: 'Manager',            tier: 'manager',          rate: 265, division: 'finance' },
-  { id: 'fin-sra', name: 'Marisol Reyna',   role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'finance' },
-  { id: 'fin-a1',  name: 'Gus Halloway',    role: 'Associate',          tier: 'associate',        rate: 145, division: 'finance' },
+  { id: 'fin-md', name: 'Forrest Gump',     role: 'Managing Director',  tier: 'partner_director', rate: 465, division: 'finance' },
+  { id: 'fin-srm', name: 'Lorelai Gilmore', role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'finance' },
+  { id: 'fin-mgr', name: 'Jack Sparrow',    role: 'Manager',            tier: 'manager',          rate: 265, division: 'finance' },
+  { id: 'fin-sra', name: 'Han Solo',        role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'finance' },
+  { id: 'fin-a1',  name: 'Ellen Ripley',    role: 'Associate',          tier: 'associate',        rate: 145, division: 'finance' },
 
   // V&Q
-  { id: 'vq-dir', name: 'Bea Fenwick',      role: 'Director',           tier: 'partner_director', rate: 355, division: 'vq' },
-  { id: 'vq-srm', name: 'Kwame Abara',      role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'vq' },
-  { id: 'vq-sra', name: 'Lorelei Ashcombe', role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'vq' },
-  { id: 'vq-a1',  name: 'Emmett Petrakis',  role: 'Associate',          tier: 'associate',        rate: 145, division: 'vq' },
-  { id: 'vq-a2',  name: 'Ximena Rocha',     role: 'Associate',          tier: 'associate',        rate: 145, division: 'vq' },
+  { id: 'vq-dir', name: 'Sarah Connor',     role: 'Director',           tier: 'partner_director', rate: 355, division: 'vq' },
+  { id: 'vq-srm', name: 'Atticus Finch',    role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'vq' },
+  { id: 'vq-sra', name: 'Willy Wonka',      role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'vq' },
+  { id: 'vq-a1',  name: 'Rocky Balboa',     role: 'Associate',          tier: 'associate',        rate: 145, division: 'vq' },
+  { id: 'vq-a2',  name: 'Jules Winnfield',  role: 'Associate',          tier: 'associate',        rate: 145, division: 'vq' },
 
   // Catch All
-  { id: 'ca-p',   name: 'Silas Beaumont',   role: 'Partner',            tier: 'partner_director', rate: 495, division: 'catchall' },
-  { id: 'ca-srm', name: 'Odette Kessler',   role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'catchall' },
-  { id: 'ca-mgr', name: 'Theo Bracewell',   role: 'Manager',            tier: 'manager',          rate: 265, division: 'catchall' },
-  { id: 'ca-sra', name: 'Nadia Castellano', role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'catchall' },
-  { id: 'ca-a1',  name: 'Percy Fitzgerald', role: 'Associate',          tier: 'associate',        rate: 145, division: 'catchall' }
+  { id: 'ca-p',   name: 'Frank Reynolds',   role: 'Partner',            tier: 'partner_director', rate: 495, division: 'catchall' },
+  { id: 'ca-srm', name: 'Fox Mulder',       role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'catchall' },
+  { id: 'ca-mgr', name: 'Dana Scully',      role: 'Manager',            tier: 'manager',          rate: 265, division: 'catchall' },
+  { id: 'ca-sra', name: 'Kevin McCallister',role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'catchall' },
+  { id: 'ca-a1',  name: 'Ace Ventura',      role: 'Associate',          tier: 'associate',        rate: 145, division: 'catchall' }
 ];
 const firmById = id => FIRM.find(c => c.id === id);
 
