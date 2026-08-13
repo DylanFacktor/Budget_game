@@ -258,60 +258,60 @@ const DIVISIONS = {
 };
 
 // The firm bench — one roster per division, each spanning senior/mid/analyst.
-// Names lean eclectic on purpose (earnest-coach energy to big-presence-icon
-// energy to cartoon-whimsy energy) without using verbatim celebrity or
-// copyrighted-character names. `division` is each person's home team; the
+// Names are a deliberately random, non-thematic mix — no per-division bit,
+// no verbatim celebrity or copyrighted-character names, just a broad and
+// varied set of common names. `division` is each person's home team; the
 // board defaults to a division's own roster, with cross-division pull-in
 // as the explicit exception for crossover work.
 const FIRM = [
-  // Clin Ops — earnest coach/mentor energy
-  { id: 'co-dir', name: 'Coach Beau Halloway', role: 'Director',     tier: 'partner_director', rate: 355, division: 'clinops' },
-  { id: 'co-srm', name: 'Roy Kincaid',         role: 'Sr Mgr',       tier: 'manager',          rate: 295, division: 'clinops' },
-  { id: 'co-sra', name: 'Keeley Marsh',        role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'clinops' },
-  { id: 'co-a1',  name: 'Nate Foley',          role: 'Associate',    tier: 'associate',        rate: 145, division: 'clinops' },
-  { id: 'co-a2',  name: 'Dani Osei',           role: 'Associate',    tier: 'associate',        rate: 145, division: 'clinops' },
+  // Clin Ops
+  { id: 'co-dir', name: 'Dennis Marlow',    role: 'Director',           tier: 'partner_director', rate: 355, division: 'clinops' },
+  { id: 'co-srm', name: 'Priya Anand',      role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'clinops' },
+  { id: 'co-sra', name: 'Walter Sandoval',  role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'clinops' },
+  { id: 'co-a1',  name: 'Odessa Fontaine',  role: 'Associate',          tier: 'associate',        rate: 145, division: 'clinops' },
+  { id: 'co-a2',  name: 'Marcus Doyle',     role: 'Associate',          tier: 'associate',        rate: 145, division: 'clinops' },
 
-  // BI — sharp data/tech energy
-  { id: 'bi-srd', name: 'Ada Kessler',         role: 'Sr Dir',       tier: 'partner_director', rate: 420, division: 'bi' },
-  { id: 'bi-srm', name: 'Quinn Baptiste',      role: 'Sr Mgr',       tier: 'manager',          rate: 295, division: 'bi' },
-  { id: 'bi-sr1', name: 'Percy Nakamura',      role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'bi' },
-  { id: 'bi-sr2', name: 'Lena Ostrowski',      role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'bi' },
-  { id: 'bi-a1',  name: 'Jamal Fitch',         role: 'Associate',    tier: 'associate',        rate: 145, division: 'bi' },
+  // BI
+  { id: 'bi-srd', name: 'Renee Castillo',   role: 'Senior Director',    tier: 'partner_director', rate: 420, division: 'bi' },
+  { id: 'bi-srm', name: 'Booker Lindqvist', role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'bi' },
+  { id: 'bi-sr1', name: 'Naomi Sato',       role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'bi' },
+  { id: 'bi-sr2', name: 'Gareth Voss',      role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'bi' },
+  { id: 'bi-a1',  name: 'Camille Ashworth', role: 'Associate',          tier: 'associate',        rate: 145, division: 'bi' },
 
-  // Ops — logistics-general energy
-  { id: 'ops-dir', name: 'General Talia Ferro', role: 'Director',     tier: 'partner_director', rate: 355, division: 'ops' },
-  { id: 'ops-srm', name: 'Hank Osei',           role: 'Sr Mgr',       tier: 'manager',          rate: 295, division: 'ops' },
-  { id: 'ops-mgr', name: 'Priya Malhotra',      role: 'Manager',      tier: 'manager',          rate: 265, division: 'ops' },
-  { id: 'ops-sra', name: 'Diego Farrow',        role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'ops' },
-  { id: 'ops-a1',  name: 'Naomi Voss',          role: 'Associate',    tier: 'associate',        rate: 145, division: 'ops' },
+  // Ops
+  { id: 'ops-dir', name: 'Desmond Palladino', role: 'Director',         tier: 'partner_director', rate: 355, division: 'ops' },
+  { id: 'ops-srm', name: 'Ingrid Solberg',    role: 'Senior Manager',   tier: 'manager',          rate: 295, division: 'ops' },
+  { id: 'ops-mgr', name: 'Otis Farrow',       role: 'Manager',          tier: 'manager',          rate: 265, division: 'ops' },
+  { id: 'ops-sra', name: 'Bianca Marchetti',  role: 'Senior Associate', tier: 'associate',        rate: 175, division: 'ops' },
+  { id: 'ops-a1',  name: 'Cormac Whitfield',  role: 'Associate',        tier: 'associate',        rate: 145, division: 'ops' },
 
-  // S&G (HR/People) — big-presence, warm media energy
-  { id: 'sg-md',  name: 'Coretta Wynn',        role: 'Mng Dir',      tier: 'partner_director', rate: 465, division: 'sg' },
-  { id: 'sg-srm', name: 'Harold Byrne',        role: 'Sr Mgr',       tier: 'manager',          rate: 295, division: 'sg' },
-  { id: 'sg-sra', name: 'Simone Vantrease',    role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'sg' },
-  { id: 'sg-a1',  name: 'Miles Okafor',        role: 'Associate',    tier: 'associate',        rate: 145, division: 'sg' },
-  { id: 'sg-a2',  name: 'Fiona Castellano',    role: 'Associate',    tier: 'associate',        rate: 145, division: 'sg' },
+  // S&G (HR/People)
+  { id: 'sg-md',  name: 'Adaeze Nnamdi',    role: 'Managing Director',  tier: 'partner_director', rate: 465, division: 'sg' },
+  { id: 'sg-srm', name: 'Sterling Boyce',   role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'sg' },
+  { id: 'sg-sra', name: 'Poppy Delacroix',  role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'sg' },
+  { id: 'sg-a1',  name: 'Rafael Okonkwo',   role: 'Associate',          tier: 'associate',        rate: 145, division: 'sg' },
+  { id: 'sg-a2',  name: 'Harriet Kowalski', role: 'Associate',          tier: 'associate',        rate: 145, division: 'sg' },
 
-  // Finance — buttoned-up numbers energy
-  { id: 'fin-md', name: 'Vivian Reyes',        role: 'Mng Dir',      tier: 'partner_director', rate: 465, division: 'finance' },
-  { id: 'fin-srm', name: 'Franklin Dietz',     role: 'Sr Mgr',       tier: 'manager',          rate: 295, division: 'finance' },
-  { id: 'fin-mgr', name: 'Grace Halloran',     role: 'Manager',      tier: 'manager',          rate: 265, division: 'finance' },
-  { id: 'fin-sra', name: 'Owen Petrakis',      role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'finance' },
-  { id: 'fin-a1',  name: 'Bianca Solheim',     role: 'Associate',    tier: 'associate',        rate: 145, division: 'finance' },
+  // Finance
+  { id: 'fin-md', name: 'Django Renwick',   role: 'Managing Director',  tier: 'partner_director', rate: 465, division: 'finance' },
+  { id: 'fin-srm', name: 'Simone Baptiste', role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'finance' },
+  { id: 'fin-mgr', name: 'Felix Osei',      role: 'Manager',            tier: 'manager',          rate: 265, division: 'finance' },
+  { id: 'fin-sra', name: 'Marisol Reyna',   role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'finance' },
+  { id: 'fin-a1',  name: 'Gus Halloway',    role: 'Associate',          tier: 'associate',        rate: 145, division: 'finance' },
 
-  // V&Q — sharp-eyed quality/compliance energy (Medicare Bloom's original cast)
-  { id: 'vq-dir', name: 'Cassian Vale',        role: 'Director',     tier: 'partner_director', rate: 355, division: 'vq' },
-  { id: 'vq-srm', name: 'Odette Brandt',       role: 'Sr Mgr',       tier: 'manager',          rate: 295, division: 'vq' },
-  { id: 'vq-sra', name: 'Pia Novak',           role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'vq' },
-  { id: 'vq-a1',  name: 'Milo Frost',          role: 'Associate',    tier: 'associate',        rate: 145, division: 'vq' },
-  { id: 'vq-a2',  name: 'Reya Okonkwo',        role: 'Associate',    tier: 'associate',        rate: 145, division: 'vq' },
+  // V&Q
+  { id: 'vq-dir', name: 'Bea Fenwick',      role: 'Director',           tier: 'partner_director', rate: 355, division: 'vq' },
+  { id: 'vq-srm', name: 'Kwame Abara',      role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'vq' },
+  { id: 'vq-sra', name: 'Lorelei Ashcombe', role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'vq' },
+  { id: 'vq-a1',  name: 'Emmett Petrakis',  role: 'Associate',          tier: 'associate',        rate: 145, division: 'vq' },
+  { id: 'vq-a2',  name: 'Ximena Rocha',     role: 'Associate',          tier: 'associate',        rate: 145, division: 'vq' },
 
-  // Catch All — zany, cartoon-whimsy energy
-  { id: 'ca-p',   name: 'Adrian Thorne',       role: 'Partner',      tier: 'partner_director', rate: 495, division: 'catchall' },
-  { id: 'ca-srm', name: 'Duke Feathersby',     role: 'Sr Mgr',       tier: 'manager',          rate: 295, division: 'catchall' },
-  { id: 'ca-mgr', name: 'Mona Quackenbush',    role: 'Manager',      tier: 'manager',          rate: 265, division: 'catchall' },
-  { id: 'ca-sra', name: 'Chip Renwick',        role: 'Sr Associate', tier: 'associate',        rate: 175, division: 'catchall' },
-  { id: 'ca-a1',  name: 'Wally Pemberton',     role: 'Associate',    tier: 'associate',        rate: 145, division: 'catchall' }
+  // Catch All
+  { id: 'ca-p',   name: 'Silas Beaumont',   role: 'Partner',            tier: 'partner_director', rate: 495, division: 'catchall' },
+  { id: 'ca-srm', name: 'Odette Kessler',   role: 'Senior Manager',     tier: 'manager',          rate: 295, division: 'catchall' },
+  { id: 'ca-mgr', name: 'Theo Bracewell',   role: 'Manager',            tier: 'manager',          rate: 265, division: 'catchall' },
+  { id: 'ca-sra', name: 'Nadia Castellano', role: 'Senior Associate',   tier: 'associate',        rate: 175, division: 'catchall' },
+  { id: 'ca-a1',  name: 'Percy Fitzgerald', role: 'Associate',          tier: 'associate',        rate: 145, division: 'catchall' }
 ];
 const firmById = id => FIRM.find(c => c.id === id);
 
@@ -470,7 +470,7 @@ function renderBench() {
     const placed = !!assign[c.id];
     const isGuest = crossIn.includes(c.id);
     const guestTag = isGuest
-      ? `<span class="guest-tag" style="--div-color:${DIVISIONS[c.division].color}">on loan · ${DIVISIONS[c.division].label}<button data-uncross="${c.id}" title="Send back">×</button></span>`
+      ? `<span class="guest-tag" style="--div-color:${DIVISIONS[c.division].color}">Cross-divisional · ${DIVISIONS[c.division].label}<button data-uncross="${c.id}" title="Send back">×</button></span>`
       : '';
     return `<div class="char tier-${c.tier} ${placed ? 'placed' : ''} ${picked === c.id ? 'picked' : ''}"
                  draggable="${!placed}" data-char="${c.id}">
