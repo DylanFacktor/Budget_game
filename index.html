@@ -174,7 +174,7 @@
   /* ===== PROJECT PICKER ===== */
   .picker {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
+    grid-template-columns: repeat(5, 1fr);
     gap: 8px;
     margin-bottom: 22px;
   }
@@ -397,6 +397,18 @@
     height: 6px;
     border-radius: 50%;
     background: var(--ink-3);
+  }
+  .brief-timeline {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--ink-3);
+    font-weight: 500;
+  }
+  .brief-timeline::before {
+    content: '⏱';
+    font-size: 11px;
+    line-height: 1;
   }
   .brief-title {
     font-size: 18px;
@@ -1512,7 +1524,7 @@
       <div class="brand-mark">S</div>
       <div>
         <h1>Scoping Room</h1>
-        <div class="sub">Healthcare consulting · 8 engagements to scope</div>
+        <div class="sub">Healthcare consulting · 5 engagements to scope</div>
       </div>
     </div>
     <div class="header-right">
@@ -1523,7 +1535,7 @@
       <div class="score-pill">
         <span class="star">★</span>
         <strong id="scoreText">0</strong>
-        <span class="total" id="scoreTotal">/ 800</span>
+        <span class="total" id="scoreTotal">/ 500</span>
       </div>
       <button class="help-btn" id="helpBtn" title="Show instructions">?</button>
     </div>
@@ -1563,6 +1575,7 @@
         <div class="brief-meta">
           <span class="brief-code" id="briefCode"></span>
           <span class="brief-type" id="briefType"></span>
+          <span class="brief-timeline" id="briefTimeline"></span>
         </div>
         <div class="brief-title" id="briefTitle"></div>
       </div>
@@ -1589,7 +1602,7 @@
   <div class="welcome-card">
     <div class="welcome-emoji">👋</div>
     <h2>Welcome to the Scoping Room</h2>
-    <p class="intro">Eight healthcare consulting engagements. Allocate hours by role to hit each one's budget with a sensible team mix.</p>
+    <p class="intro">Five real healthcare consulting engagements from live Facktor contracts. Allocate hours by role to hit each one's budget with a sensible team mix.</p>
 
     <div class="welcome-steps">
       <div class="welcome-step">
@@ -1705,238 +1718,162 @@ const PROJECT_TYPES = {
   transform:    { label: 'Transformation',          color: '#f97316', soft: '#ffedd5' },  // orange
   data:         { label: 'Data & Analytics',        color: '#0ea5e9', soft: '#e0f2fe' },  // sky
   interim:      { label: 'Interim Leadership',      color: '#a855f7', soft: '#f3e8ff' },  // purple
+  recruitment:  { label: 'Executive Recruitment',   color: '#ec4899', soft: '#fce7f3' },  // pink
   turnaround:   { label: 'Crisis & Turnaround',     color: '#dc2626', soft: '#fee2e2' }   // red
 };
 
 const PROJECTS = [
   // ============================================================
-  // P-00: Medicare Enrollment — small-budget compliance engagement.
-  // Explicit difficulty band: $6K Standard / $5K Hard.
-  // Roles: Director (compliance oversight) + Sr. Associate / Associate
-  // (execution). teamSize 3 — all three tiers should be on the team.
+  // P-01: Bloom Patient Retention (Cherry Health-style)
+  // 12–14 weeks. Patient retention & Medicare transition strategy for
+  // an FQHC. Team-based Value & Quality engagement.
   // ============================================================
   {
-    code: 'P-01', name: 'Medicare Enrollment', type: 'compliance',
-    diff: 1, budget: 6000, tol: 0.05, hardBudget: 5000,
-    teamSize: 3, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
-    desc: 'Help a multispecialty clinic complete CMS Medicare enrollment for a new service line. Tight, focused engagement: provider enrollment forms (CMS-855), Medicare Conditions of Participation review, state-level coordination, and the submission packet.',
+    code: 'P-01', name: 'Bloom Patient Retention', type: 'strategy',
+    diff: 2, budget: 49000, tol: 0.06, easyBudget: 55000, hardBudget: 43625,
+    teamSize: 4, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
+    timeline: '12–14 weeks',
+    desc: 'Bloom is Facktor\'s Medicare readiness and aging patient retention program for FQHCs. Help the health center proactively engage patients 55–64 before Medicare eligibility, strengthen continuity of care, and support long-term Medicare growth strategies.',
     deliverables: [
-      { name: 'Project Management', note: 'Kickoff, status, doc tracking, internal coordination', hrsRange: [3, 6],
-        rules: [{ group: 'associate', minHrs: 3, severity: 'critical', reason: 'PM coordination, scheduling, and doc tracking is analyst execution work — Associates or Sr. Associates run the PM workstream' },
+      { name: 'Project Management', note: 'Internal coordination, weekly status, doc management, working session prep', hrsRange: [15, 25],
+        rules: [{ group: 'associate', minHrs: 12, severity: 'critical', reason: 'PM coordination, weekly status, and doc management is analyst execution work — Associates or Sr. Associates run the PM workstream' },
                 { group: 'partner_director', maxHrs: 0, severity: 'critical', reason: 'PM coordination should not pull Partner-Director time — that is analyst execution work, not senior work' }] },
-      { name: 'Provider enrollment forms (CMS-855)', note: 'Form prep, attestations, NPI/PECOS coordination, supporting docs', hrsRange: [8, 14], specialties: ['compliance', 'operations'],
-        rules: [{ group: 'associate', minHrs: 6, severity: 'expected', reason: 'CMS-855 form prep and documentation is heavy analyst execution work' }] },
-      { name: 'Compliance review & enrollment strategy', note: 'Medicare Conditions of Participation review, risk flagging, strategic guidance', hrsRange: [4, 8], specialties: ['compliance'],
-        rules: [{ group: 'partner_director', minHrs: 3, severity: 'critical', reason: 'Medicare compliance review and enrollment strategy must be Director-led — regulatory risk and CoP interpretation need senior judgment' },
-                { group: 'associate', minHrs: 1, severity: 'expected', reason: 'analyst should pull and pre-screen the compliance docs so the Director walks into the review prepared' }] },
-      { name: 'Submission packet & state coordination', note: 'Final packet assembly, fiscal intermediary submission, state Medicaid coordination', hrsRange: [4, 8], specialties: ['operations'],
-        rules: [{ group: 'associate', minHrs: 3, severity: 'expected', reason: 'packet assembly and submission logistics are Associate-level execution' }] }
+      { name: 'Operational & Patient Engagement Analysis', note: 'Assess health center readiness — workflows, staffing roles, outreach processes, patient education, care management integration', hrsRange: [40, 60], specialties: ['operations', 'clinical'],
+        rules: [{ group: 'manager', minHrs: 15, severity: 'critical', reason: 'operational assessment requires Manager-level clinical operations expertise to evaluate workflows and staffing roles' },
+                { group: 'associate', minHrs: 20, severity: 'expected', reason: 'workflow documentation, staffing role inventory, and patient education review is analyst execution' }] },
+      { name: 'Patient Attrition & Population Analysis', note: 'Aging patient panel analysis, historical retention patterns, post-65 attribution, payer and Medicare Advantage enrollment dynamics', hrsRange: [30, 45], specialties: ['data', 'finance'],
+        rules: [{ group: 'manager', minHrs: 12, severity: 'critical', reason: 'population analysis and financial impact modeling of retention/attrition trends needs Manager-level ownership' },
+                { group: 'associate', minHrs: 18, severity: 'expected', reason: 'data extraction, retention curve analysis, and payer dynamics is analyst-heavy execution' }] },
+      { name: 'Recommendations & Bloom Strategy Development', note: 'Tailored strategic and operational recommendations — messaging, workflows, staff education, community engagement, Bloom program activities', hrsRange: [30, 45], specialties: ['strategy', 'operations'],
+        rules: [{ group: 'partner_director', minHrs: 10, severity: 'critical', reason: 'Bloom strategy touches the health center\'s long-term Medicare growth — Partner-Director owns strategic direction and client-facing recommendations' },
+                { group: 'manager', minHrs: 8, severity: 'expected', reason: 'a Manager operationalizes strategic direction into concrete workflows and program activities' },
+                { group: 'associate', minHrs: 10, severity: 'expected', reason: 'Associate drafts the recommendations memo and pulls supporting research' }] },
+      { name: 'Executive read-out to leadership', note: 'Final presentation of prioritized recommendations aligned with the health center\'s operational realities and Medicare growth goals', hrsRange: [15, 25], specialties: ['strategy', 'governance'],
+        rules: [{ group: 'partner_director', minHrs: 5, severity: 'critical', reason: 'the executive read-out must be led by a Partner, MD, or Sr. Director — client expects senior presence for a strategic recommendation delivery' },
+                { group: 'manager', minHrs: 4, severity: 'expected', reason: 'the Manager who ran the operational analysis should be present for continuity and detailed Q&A' },
+                { group: 'associate', minHrs: 3, severity: 'expected', reason: 'the Associate who built the analysis materials handles deep-dive questions and captures follow-ups' }] }
     ]
   },
   // ============================================================
-  // P-01: HRSA OSV Prep — INTACT (the 21-chapter structure IS the point)
+  // P-02: Connect & Cover Cohort (Arizona Alliance PCA-style)
+  // 8 biweekly modules over ~4 months. Structured learning
+  // collaborative for a state PCA responding to HR1 / Medicaid shifts.
   // ============================================================
   {
-    code: 'P-02', name: 'HRSA OSV Prep', type: 'compliance',
-    diff: 1, budget: 28000, tol: 0.07, teamSize: 5, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
-    desc: 'Mock Operational Site Visit readiness review for a Federally Qualified Health Center. Three-day on-site assessment across the HRSA Compliance Manual\'s 21 chapters, mirroring the Site Visit Protocol\'s three review tracks: Fiscal, Clinical, and Administrative/Governance.',
+    code: 'P-02', name: 'Connect & Cover Cohort', type: 'strategy',
+    diff: 2, budget: 53250, tol: 0.05, easyBudget: 60000, hardBudget: 45000,
+    teamSize: 6, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
+    timeline: '8 biweekly modules · ~4 months',
+    desc: 'Facilitated learning collaborative for a state Primary Care Association responding to HR1 and the shifting Medicaid landscape. Deliver 8 biweekly modules blending peer learning with actionable tools — each participating health center leaves with a tailored Connect & Cover action plan.',
     deliverables: [
-      { name: 'Project Management', note: 'Kickoff, weekly status, doc requests, scheduling', hrsRange: [10, 18],
-        rules: [{ group: 'associate', minHrs: 8, severity: 'critical', reason: 'PM coordination, scheduling, and doc tracking is analyst execution work — Associates or Sr. Associates run the PM workstream' },
+      { name: 'Project Management', note: 'Cohort logistics, session prep, participant coordination, module scheduling', hrsRange: [30, 45],
+        rules: [{ group: 'associate', minHrs: 22, severity: 'critical', reason: 'cohort logistics, session prep, and participant coordination is analyst execution work' },
                 { group: 'partner_director', maxHrs: 0, severity: 'critical', reason: 'PM coordination should not pull Partner-Director time — that is analyst execution work, not senior work' }] },
-      { name: 'Pre-visit document review', note: 'Form 5A, policies, Board minutes, financials', hrsRange: [12, 20], specialties: ['compliance'],
-        rules: [{ group: 'associate', minHrs: 10, severity: 'expected', reason: 'document review is associate-level work — not appropriate for senior staffing' },
-                { group: 'manager', minHrs: 2, severity: 'nice-to-have', reason: 'a Manager should QC findings before they go upstream' }] },
-      { name: 'Ch. 3 — Needs Assessment review', note: 'Service area + population analysis', hrsRange: [6, 10], specialties: ['operations'],
-        rules: [{ group: 'associate', minHrs: 4, severity: 'expected', reason: 'demographic and needs analysis is analyst-driven' }] },
-      { name: 'Ch. 4/5 — Required Services & Clinical Staffing', note: 'Scope of project + credentialing files', hrsRange: [8, 12], specialties: ['clinical'],
-        rules: [{ group: 'associate', minHrs: 4, severity: 'expected', reason: 'clinical staffing/credentialing review needs mid-level delivery staffing' }] },
-      { name: 'Ch. 9/10 — Sliding Fee & Billing', note: 'Sliding fee discount program + collections policy', hrsRange: [8, 12], specialties: ['rcm', 'finance'],
-        rules: [{ group: 'associate', minHrs: 4, severity: 'expected', reason: 'sliding fee/billing review benefits from delivery team analysis' }] },
-      { name: 'Ch. 15–17 — Financial Mgmt & Accounting', note: 'Fiscal controls, audit, federal grants', hrsRange: [8, 12], specialties: ['finance'],
-        rules: [{ group: 'associate', minHrs: 5, severity: 'expected', reason: 'fiscal documentation review is analyst execution work — Partner-Director oversight comes through the findings memo and executive read-out, not chapter-level review' }] },
-      { name: 'Ch. 18–20 — Board Composition & Authority', note: '51% patient majority + governance', hrsRange: [6, 10], specialties: ['governance'],
-        rules: [{ group: 'associate', minHrs: 4, severity: 'expected', reason: 'board document review is analyst execution work — Partner-Director judgment on governance comes through the findings memo and executive read-out' }] },
-      { name: 'On-site interviews & walkthroughs', note: 'Clinical, admin, fiscal interview tracks', hrsRange: [22, 34], specialties: ['operations', 'clinical', 'finance'],
-        rules: [{ group: 'partner_director', minHrs: 10, severity: 'critical', reason: 'on-site interviews must be led by experienced project leadership — not appropriate for Associates alone' },
-                { group: 'manager', minHrs: 6, severity: 'expected', reason: 'a Manager coordinates the interview tracks alongside the Partner-Director — continuity from kickoff to on-site' },
-                { group: 'associate', minHrs: 8, severity: 'expected', reason: 'on-site work also requires delivery team support for notetaking and coverage' }] },
-      { name: 'Findings memo & remediation roadmap', note: 'Gap inventory + corrective action plan', hrsRange: [10, 18], specialties: ['compliance'],
-        rules: [{ group: 'partner_director', minHrs: 4, severity: 'critical', reason: 'findings memo is a project lead deliverable — Partner-Director must shape the narrative and own the corrective action recommendations' },
-                { group: 'manager', minHrs: 3, severity: 'expected', reason: 'a Manager carries continuity from chapter review into the memo, structuring findings before the Partner-Director shapes the narrative' },
-                { group: 'associate', minHrs: 5, severity: 'expected', reason: 'Associates draft the memo from chapter-review notes — Partner-Director should not be doing the writing' }] },
-      { name: 'Executive read-out to leadership', note: 'Final presentation to CEO + Board chair', hrsRange: [8, 14], specialties: ['governance', 'strategy'],
-        rules: [{ group: 'partner_director', minHrs: 4, severity: 'critical', reason: 'the CEO/Board read-out must be led by a Partner, MD, or Sr. Director — client expects senior presence' },
-                { group: 'manager', minHrs: 2, severity: 'expected', reason: 'the Manager who ran the engagement must be in the room — continuity, accountability, and the ability to answer detailed questions about the findings' },
-                { group: 'associate', minHrs: 2, severity: 'expected', reason: 'the Associate who built the materials should be present to handle deep-dive questions and own follow-ups' }] }
+      { name: 'Content Development — Strategy & Financial modules', note: 'Modules 1-2: framing the moment + strategic budgeting & ROI for coverage continuity', hrsRange: [40, 60], specialties: ['strategy', 'finance'],
+        rules: [{ group: 'partner_director', minHrs: 10, severity: 'critical', reason: 'strategic framing and financial risk modeling for statewide CHC networks needs Partner-Director ownership' },
+                { group: 'manager', minHrs: 12, severity: 'expected', reason: 'Manager builds the target-setting worksheets and month-by-month modeling approach' },
+                { group: 'associate', minHrs: 15, severity: 'expected', reason: 'Associate researches state assumptions and drafts the financial risk model inputs' }] },
+      { name: 'Content Development — Ops modules', note: 'Modules 3-5: comms tools, team roles & staffing, data strategy', hrsRange: [45, 65], specialties: ['operations', 'data', 'people'],
+        rules: [{ group: 'manager', minHrs: 20, severity: 'critical', reason: 'comms playbooks, staffing models, and data governance frameworks are Manager-led operational deliverables' },
+                { group: 'associate', minHrs: 22, severity: 'expected', reason: 'Associate assembles workflow templates, job descriptions, and data inventory checklists' }] },
+      { name: 'Content Development — Tech modules', note: 'Modules 6-7: technology stack, operationalizing Azara analytics', hrsRange: [30, 45], specialties: ['data', 'it'],
+        rules: [{ group: 'manager', minHrs: 12, severity: 'critical', reason: 'tech stack integration and Azara workflow design is Manager-level ownership' },
+                { group: 'associate', minHrs: 15, severity: 'expected', reason: 'Associate builds documentation standards, configuration guidance, and workflow diagrams' }] },
+      { name: 'Facilitation & Implementation Support', note: 'Module 8 + live delivery of all 8 biweekly sessions, breakout facilitation, monitoring framework', hrsRange: [45, 70], specialties: ['strategy', 'operations'],
+        rules: [{ group: 'partner_director', minHrs: 12, severity: 'critical', reason: 'live facilitation of statewide CHC leadership requires Partner-Director presence and credibility' },
+                { group: 'manager', minHrs: 20, severity: 'expected', reason: 'Manager leads breakouts and converts session outputs into executable workstreams' },
+                { group: 'associate', minHrs: 15, severity: 'expected', reason: 'Associate captures session notes, compiles the readiness guide, and maintains the monitoring framework' }] }
     ]
   },
   // ============================================================
-  // P-02: RCM Quick Assessment (5 deliverables)
+  // P-03: Interim Finance Director (Tennessee PCA-style)
+  // 12-month monthly retainer, ~25 hrs/month. Full-scope finance
+  // leadership for a Primary Care Association.
   // ============================================================
   {
-    code: 'P-03', name: 'Revenue Cycle Quick Assessment', type: 'diagnostic',
-    diff: 1, budget: 42000, tol: 0.06, teamSize: 3, rolesAvailable: ['srmgr', 'mgr', 'srassoc', 'assoc'],
-    desc: 'Three-week diagnostic of revenue cycle performance for a 250-bed community hospital. Benchmark KPIs, identify denial drivers, and quantify recovery opportunity.',
+    code: 'P-03', name: 'Interim Finance Director', type: 'interim',
+    diff: 3, budget: 91500, tol: 0.05, easyBudget: 100000, hardBudget: 75000,
+    teamSize: 4, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc'],
+    timeline: '12-month monthly retainer · ~25 hrs/mo',
+    desc: 'Serve as embedded Interim Finance Director for a Primary Care Association. Provide full-scope financial leadership: strategic planning, Board reporting, HRSA grant budgeting, monthly close, audit supervision, and executive team support on a monthly retainer basis.',
     deliverables: [
-      { name: 'Project Management & data request', note: 'Kickoff, stakeholder mgmt, EHR + claims data extracts', hrsRange: [38, 54],
-        rules: [{ group: 'associate', minHrs: 28, severity: 'critical', reason: 'PM coordination AND data extraction are both analyst-tier execution — Associates and Sr. Associates run this workstream' },
+      { name: 'Project Management & transition onboarding', note: 'Kickoff, 90-day transition plan, working relationships, priority-setting', hrsRange: [30, 50], specialties: ['operations'],
+        rules: [{ group: 'associate', minHrs: 20, severity: 'critical', reason: 'transition documentation, scheduling, and coordination is analyst execution work — Sr. Associates run the PM workstream' },
                 { group: 'partner_director', maxHrs: 0, severity: 'critical', reason: 'PM coordination should not pull Partner-Director time — that is analyst execution work, not senior work' }] },
-      { name: 'KPI benchmarking & denials analysis', note: 'Days in AR, denial rate vs. peers, root-cause drivers', hrsRange: [50, 74], specialties: ['rcm', 'data'],
-        rules: [{ group: 'associate', minHrs: 28, severity: 'expected', reason: 'benchmarking and root-cause analysis is analyst-heavy' },
-                { group: 'manager', minHrs: 8, severity: 'expected', reason: 'a Manager should own benchmark methodology and findings' }] },
-      { name: 'Process & coding assessment', note: 'Registration, eligibility, coder productivity, DRG accuracy', hrsRange: [24, 42], specialties: ['rcm'],
-        rules: [{ group: 'manager', minHrs: 12, severity: 'expected', reason: 'process assessment requires Manager-level operational expertise' },
-                { group: 'associate', minHrs: 8, severity: 'expected', reason: 'process walks, productivity data pulls, and DRG sampling are analyst execution work — Manager interprets, Associate digs in' }] },
-      { name: 'Opportunity sizing model', note: 'Quantified $ recovery by initiative, prioritized roadmap', hrsRange: [28, 46], specialties: ['rcm', 'finance'],
-        rules: [{ group: 'manager', minHrs: 12, severity: 'critical', reason: 'sizing model with dollar projections must be Manager-led — Sr. Manager/Manager owns this critical workstream' },
-                { group: 'associate', minHrs: 10, severity: 'expected', reason: 'Associates build the model and run the scenarios — Manager owns the methodology and the number' }] },
-      { name: 'Findings deck & executive readout', note: 'C-suite presentation with prioritized roadmap', hrsRange: [24, 42], specialties: ['rcm', 'strategy'],
-        rules: [{ group: 'manager', minHrs: 8, severity: 'critical', reason: 'C-suite presentation requires Manager-level leadership — the most senior available role on this engagement; deck production needs Manager-level ownership' },
-                { group: 'associate', minHrs: 8, severity: 'expected', reason: 'Associates produce the deck and stay in the room — continuity into C-suite Q&A, plus deck production is analyst execution' }] }
+      { name: 'Monthly close & budget cycle', note: '12 monthly closes, accruals, FY budget build, LRP refresh, G/L review and approval', hrsRange: [90, 130], specialties: ['finance'],
+        rules: [{ group: 'manager', minHrs: 30, severity: 'critical', reason: 'monthly close mechanics and budget build require Manager-level finance ownership month over month' },
+                { group: 'partner_director', minHrs: 25, severity: 'expected', reason: 'the Interim Finance Director reviews and approves monthly close and signs off the budget' },
+                { group: 'associate', minHrs: 40, severity: 'expected', reason: 'Sr. Associate executes the close entries, accruals, and reconciliations' }] },
+      { name: 'Board & finance committee reporting', note: '12 monthly Board reports + finance committee presentations + executive team monthly financial report', hrsRange: [50, 75], specialties: ['finance', 'governance'],
+        rules: [{ group: 'partner_director', minHrs: 20, severity: 'critical', reason: 'Board and finance committee presentations must be Partner/MD/Sr. Director led — this IS the Interim Finance Director role' },
+                { group: 'manager', minHrs: 12, severity: 'expected', reason: 'Manager builds committee decks and financial narrative structure' },
+                { group: 'associate', minHrs: 10, severity: 'expected', reason: 'Sr. Associate assembles the board pack materials from close outputs' }] },
+      { name: 'HRSA grant & federal fiscal management', note: 'HRSA grant budgeting, PMS drawdowns and reconciliations, FFRs, SAC/BPR budget narrative, annual single audit supervision', hrsRange: [40, 60], specialties: ['finance', 'compliance'],
+        rules: [{ group: 'partner_director', minHrs: 15, severity: 'critical', reason: 'HRSA grant compliance carries federal audit risk — the Interim Finance Director owns the sign-off and audit response' },
+                { group: 'manager', minHrs: 10, severity: 'expected', reason: 'Manager owns grant mechanics — PMS drawdowns, FFR filings, budget narrative structure' },
+                { group: 'associate', minHrs: 8, severity: 'expected', reason: 'Sr. Associate assembles supporting documentation and drawdown reconciliations' }] },
+      { name: 'Accounting systems & AI readiness review', note: 'One-time strategic assessment: current accounting system scalability and AI readiness scan', hrsRange: [20, 35], specialties: ['finance', 'data'],
+        rules: [{ group: 'partner_director', minHrs: 8, severity: 'critical', reason: 'strategic review of accounting systems and AI readiness feeds a multi-year capital decision — must be Partner/Director-owned' },
+                { group: 'associate', minHrs: 6, severity: 'expected', reason: 'Sr. Associate conducts the discovery, system inventory, and AI use-case research' }] }
     ]
   },
   // ============================================================
-  // P-03: Healthcare HR Transformation (smaller scope, 5 deliverables)
+  // P-04: Executive Recruitment (Eisner Health-style)
+  // 4-6 month search for a Director-level clinical operations leader.
   // ============================================================
   {
-    code: 'P-04', name: 'Healthcare HR Transformation', type: 'transform',
-    diff: 2, budget: 78000, tol: 0.05, teamSize: 5, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
-    desc: 'Targeted HR transformation for a mid-size health system. Org design refresh, total rewards review, talent acquisition optimization, and HRIS roadmap. Smaller scope than enterprise HR work but covers the same workstream categories.',
+    code: 'P-04', name: 'Executive Recruitment', type: 'recruitment',
+    diff: 2, budget: 34000, tol: 0.07, easyBudget: 40000, hardBudget: 28000,
+    teamSize: 4, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
+    timeline: '4–6 months',
+    desc: 'Executive search for a Director of Clinic Operations at a Federally Qualified Health Center. Market-informed sourcing, structured assessment, and offer support to secure a high-caliber operational leader with FQHC experience.',
     deliverables: [
-      { name: 'Project Management & change governance', note: 'PMO, steering committee, communications, change network', hrsRange: [44, 64],
-        rules: [{ group: 'associate', minHrs: 22, severity: 'critical', reason: 'PMO coordination, communications execution, and change-network logistics are analyst-tier work — Associates and Sr. Associates run this workstream' },
-                { group: 'partner_director', maxHrs: 0, severity: 'critical', reason: 'PMO coordination should not pull Partner-Director time — that is analyst execution work, not senior work' }] },
-      { name: 'Workforce planning & org design', note: 'Span of control analysis, layer optimization, role rationalization', hrsRange: [72, 104], specialties: ['people'],
-        rules: [{ group: 'partner_director', minHrs: 12, severity: 'critical', reason: 'org design recommendations touch every leader — must be Partner/Director-led for credibility and political navigation' },
-                { group: 'manager', minHrs: 16, severity: 'expected', reason: 'a Manager structures the org-design recommendations and runs leader interviews — continuity between Partner direction and Associate analysis' },
-                { group: 'associate', minHrs: 24, severity: 'expected', reason: 'span of control and headcount analysis is Associate-level analytical work' }] },
-      { name: 'Total rewards redesign', note: 'Comp benchmarking, benefits review, pay equity analysis', hrsRange: [52, 80], specialties: ['people', 'finance'],
-        rules: [{ group: 'partner_director', minHrs: 8, severity: 'critical', reason: 'total rewards strategy involves CHRO/CFO-level decisions — needs senior leadership ownership' },
-                { group: 'manager', minHrs: 12, severity: 'expected', reason: 'a Manager owns the comp/benefits methodology and structures the senior recommendations' },
-                { group: 'associate', minHrs: 22, severity: 'expected', reason: 'comp benchmarking and pay equity analysis is Associate-driven execution' }] },
-      { name: 'Talent acquisition & retention program', note: 'TA process redesign, employee experience, retention analytics', hrsRange: [42, 62], specialties: ['people'],
-        rules: [{ group: 'manager', minHrs: 12, severity: 'critical', reason: 'TA and retention program design is Manager-level operational expertise' },
-                { group: 'associate', minHrs: 16, severity: 'expected', reason: 'retention analytics and turnover data analysis is Associate work' }] },
-      { name: 'HRIS strategy & implementation roadmap', note: 'System assessment, future-state architecture, transition plan', hrsRange: [42, 62], specialties: ['people', 'it'],
-        rules: [{ group: 'partner_director', minHrs: 8, severity: 'expected', reason: 'HRIS strategy is a multi-year capital decision — needs Director-level expertise' },
-                { group: 'manager', minHrs: 12, severity: 'expected', reason: 'system assessment and roadmap authorship is Manager-led work' }] }
-    ]
-  },
-  // ============================================================
-  // P-04: BI Ledger Build (5 deliverables — automated payment ledger build engagement)
-  // ============================================================
-  {
-    code: 'P-05', name: 'BI Ledger Build', type: 'data',
-    diff: 2, budget: 145000, tol: 0.04, teamSize: 4, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
-    desc: 'Build an automated payment ledger and BI reporting solution for a mid-size health system. Replace manual workflows with validated, automated data capture and reporting tied to existing financial systems. Includes staff training and job aid development for sustainability.',
-    deliverables: [
-      { name: 'Project Management and weekly workgroup', note: 'PMO, weekly workgroup cadence, status, stakeholder mgmt', hrsRange: [80, 120],
-        rules: [{ group: 'associate', minHrs: 50, severity: 'critical', reason: 'sustained PMO coordination and workgroup logistics are analyst-tier execution work — Associates and Sr. Associates run this workstream' },
-                { group: 'partner_director', maxHrs: 0, severity: 'critical', reason: 'PMO coordination should not pull Partner-Director time — that is analyst execution work, not senior work' }] },
-      { name: 'Current State Assessment and Project Planning', note: 'Workflow inventory, system mapping, gap analysis, build roadmap', hrsRange: [100, 150], specialties: ['data', 'operations'],
-        rules: [{ group: 'manager', minHrs: 30, severity: 'critical', reason: 'current state assessment shapes the entire build — must be Manager-led for accountability' },
-                { group: 'associate', minHrs: 40, severity: 'expected', reason: 'workflow documentation and system inventory is analyst execution' }] },
-      { name: 'Report Development and Data Capture/Workflow Validation', note: 'BI report build, validation against source data, workflow testing', hrsRange: [130, 200], specialties: ['data'],
-        rules: [{ group: 'associate', minHrs: 80, severity: 'critical', reason: 'report development and data validation is heavy analyst-level execution work — the bulk of the build' },
-                { group: 'manager', minHrs: 25, severity: 'expected', reason: 'a Manager should QC the validation methodology before deliverables go to the client' }] },
-      { name: 'Automated Payment Ledger Build', note: 'Ledger logic, automation rules, integration with payment systems', hrsRange: [110, 160], specialties: ['data', 'finance'],
-        rules: [{ group: 'manager', minHrs: 35, severity: 'critical', reason: 'automation logic and integration design has real financial risk — needs Manager-level technical ownership' },
-                { group: 'associate', minHrs: 60, severity: 'expected', reason: 'build execution and configuration is analyst work' }] },
-      { name: 'Staff Job Aids and Training', note: 'Job aids, end-user training materials, train-the-trainer sessions', hrsRange: [50, 80], specialties: ['operations'],
-        rules: [{ group: 'associate', minHrs: 30, severity: 'expected', reason: 'job aid drafting and training materials development is analyst-led' },
-                { group: 'manager', minHrs: 10, severity: 'expected', reason: 'training delivery and stakeholder Q&A benefits from Manager-level presence' }] }
-    ]
-  },
-  // ============================================================
-  // P-05: CalAIM ECM Implementation (5 deliverables — California Medi-Cal Enhanced Care Management)
-  // ============================================================
-  {
-    code: 'P-06', name: 'CalAIM ECM Implementation', type: 'transform',
-    diff: 3, budget: 180000, tol: 0.04, teamSize: 5, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
-    desc: 'Multi-month implementation of CalAIM Enhanced Care Management (ECM) program for a California Medi-Cal provider. Build out templates, workflows, referral processes, reporting, and a sustainability plan to operationalize ECM at scale.',
-    deliverables: [
-      { name: 'Program Management & Coordination', note: 'PMO setup, weekly workgroup, stakeholder coordination, status reporting', hrsRange: [105, 155],
-        rules: [{ group: 'associate', minHrs: 60, severity: 'critical', reason: 'sustained PMO setup, workgroup logistics, and status reporting are analyst-tier execution work — Associates and Sr. Associates run this workstream' },
-                { group: 'partner_director', maxHrs: 0, severity: 'critical', reason: 'PMO coordination should not pull Partner-Director time — that is analyst execution work, not senior work' }] },
-      { name: 'Development and implementation of new ECM templates and workflows', note: 'Care management templates, intake workflows, documentation standards, EHR build', hrsRange: [135, 205], specialties: ['clinical', 'operations'],
-        rules: [{ group: 'manager', minHrs: 35, severity: 'critical', reason: 'template and workflow design is core operational work — must be Manager-led with clinical/operational expertise' },
-                { group: 'associate', minHrs: 70, severity: 'expected', reason: 'template build and workflow documentation is analyst execution' }] },
-      { name: 'Development and implementation of reporting information', note: 'BI reporting build, KPI definition, dashboard development, validation', hrsRange: [115, 175], specialties: ['data'],
-        rules: [{ group: 'associate', minHrs: 70, severity: 'critical', reason: 'reporting build is heavy analyst-level execution — bulk of the technical work lives here' },
-                { group: 'manager', minHrs: 22, severity: 'expected', reason: 'a Manager should own KPI methodology and validate dashboards before client delivery' }] },
-      { name: 'Development and implementation of new ECM referral strategy and workflow', note: 'Referral source identification, partner outreach, intake-to-enrollment workflow', hrsRange: [115, 175], specialties: ['operations', 'strategy'],
-        rules: [{ group: 'partner_director', minHrs: 20, severity: 'critical', reason: 'referral strategy involves cross-organization partnerships — needs senior client-facing leadership for credibility with referral partners' },
-                { group: 'manager', minHrs: 30, severity: 'expected', reason: 'workflow design and partner coordination is Manager-led' },
-                { group: 'associate', minHrs: 25, severity: 'expected', reason: 'referral source research, partner contact lists, and intake workflow documentation is Associate-level execution' }] },
-      { name: 'Creation of CalAIM sustainability work plan', note: 'Long-term operational model, staffing plan, financial sustainability, post-engagement roadmap', hrsRange: [100, 150], specialties: ['strategy', 'finance'],
-        rules: [{ group: 'partner_director', minHrs: 24, severity: 'critical', reason: 'sustainability planning is a strategic deliverable that goes to executive leadership — must be Partner/Director-owned' },
-                { group: 'manager', minHrs: 22, severity: 'expected', reason: 'operational model and staffing plan authorship is Manager-level work' },
-                { group: 'associate', minHrs: 18, severity: 'expected', reason: 'financial modeling and roadmap documentation is Associate execution work — continuity from build phase into sustainability planning' }] }
-    ]
-  },
-  // ============================================================
-  // P-06: Interim CFO (5 deliverables — collapses the 6-month duties)
-  // ============================================================
-  {
-    code: 'P-07', name: 'Interim CFO Engagement', type: 'interim',
-    diff: 3, budget: 260000, tol: 0.03, teamSize: 4, rolesAvailable: ['partner', 'md', 'srdir', 'srmgr', 'mgr', 'srassoc'],
-    desc: 'Six-month interim CFO placement at a regional health system mid-turnaround. Lead finance function, monthly close, banking relationships, and board reporting while permanent CFO search is underway.',
-    deliverables: [
-      { name: 'Project Management', note: 'Engagement coordination, status reporting, Board prep logistics, SharePoint/doc mgmt, internal comms', hrsRange: [25, 45],
-        rules: [{ group: 'associate', minHrs: 24, severity: 'critical', reason: 'PM coordination, status reporting, and SharePoint/doc mgmt is analyst execution work — Sr. Associates run the PM workstream' },
+      { name: 'Project Management & search kickoff', note: 'Status cadence, stakeholder coordination, communication updates throughout the search', hrsRange: [10, 18], specialties: ['operations'],
+        rules: [{ group: 'associate', minHrs: 8, severity: 'critical', reason: 'search coordination, status updates, and stakeholder communication is analyst execution work' },
                 { group: 'partner_director', maxHrs: 0, severity: 'critical', reason: 'PM coordination should not pull Partner-Director time — that is analyst execution work, not senior work' }] },
-      { name: 'Embedded interim CFO leadership', note: 'Full-time CFO role + finance team management, 6 months on-site', hrsRange: [365, 455], specialties: ['finance'],
-        rules: [{ group: 'partner_director', minHrs: 365, severity: 'critical', reason: 'this IS a CFO role — must be filled by a Partner, MD, or Sr. Director, full-time-equivalent hours' }] },
-      { name: 'Monthly close & budget', note: '6 monthly closes, accruals, FY budget build, 5-yr LRP refresh', hrsRange: [124, 170], specialties: ['finance'],
-        rules: [{ group: 'partner_director', minHrs: 62, severity: 'expected', reason: 'close and budget oversight needs Director-level project leadership' },
-                { group: 'manager', minHrs: 20, severity: 'expected', reason: 'a Manager owns the close mechanics and the LRP refresh — continuity between Director oversight and Associate execution' },
-                { group: 'associate', minHrs: 78, severity: 'expected', reason: 'close and budget execution is analyst-supported' }] },
-      { name: 'Cash, lender & covenant management', note: '13-week cash forecast, daily monitoring, lender relations', hrsRange: [78, 116], specialties: ['finance'],
-        rules: [{ group: 'partner_director', minHrs: 46, severity: 'critical', reason: 'liquidity and lender relationships must be partner/MD-level — no Associate-level lender calls' },
-                { group: 'manager', minHrs: 28, severity: 'expected', reason: 'Manager-level execution of cash forecast' },
-                { group: 'associate', minHrs: 10, severity: 'expected', reason: 'Associate runs the daily cash monitoring and assembles the 13-week pack — Manager interprets, Associate maintains' }] },
-      { name: 'Board finance committee reporting', note: '6 board meetings + finance committee prep + audit coordination', hrsRange: [62, 94], specialties: ['finance', 'governance'],
-        rules: [{ group: 'partner_director', minHrs: 38, severity: 'critical', reason: 'Board finance committee is a Partner/MD/Sr. Director role' },
-                { group: 'manager', minHrs: 18, severity: 'expected', reason: 'Manager structures committee materials and runs audit coordination' },
-                { group: 'associate', minHrs: 10, severity: 'expected', reason: 'Associate prepares the board pack from close outputs — continuity into the committee read-out' }] },
-      { name: 'Recruitment support & transition', note: 'Permanent CFO search, 30-day overlap, transition documentation', hrsRange: [34, 56], specialties: ['people', 'finance'],
-        rules: [{ group: 'partner_director', minHrs: 18, severity: 'expected', reason: 'recruitment support requires senior credibility; transition documentation needs project lead ownership' },
-                { group: 'manager', minHrs: 10, severity: 'expected', reason: 'a Manager structures the transition documentation and runs handover meetings with the incoming CFO' },
-                { group: 'associate', minHrs: 6, severity: 'expected', reason: 'Associate assembles the transition binder and maintains the handover artifacts' }] }
+      { name: 'Role definition & posting strategy', note: 'Refine job description, competitive salary range based on industry standards and regional cost of living', hrsRange: [15, 25], specialties: ['people'],
+        rules: [{ group: 'manager', minHrs: 6, severity: 'critical', reason: 'JD refinement and comp benchmarking is Manager-level HR expertise' },
+                { group: 'associate', minHrs: 6, severity: 'expected', reason: 'Associate compiles comp market data and drafts JD revisions' }] },
+      { name: 'Active recruitment & sourcing', note: 'LinkedIn, Indeed, peer networks, referrals, phone screens, application intake', hrsRange: [25, 40], specialties: ['people'],
+        rules: [{ group: 'manager', minHrs: 12, severity: 'critical', reason: 'sourcing strategy, network outreach, and phone screens are Manager-led — this is the core recruiter workstream' },
+                { group: 'associate', minHrs: 8, severity: 'expected', reason: 'Associate manages the application inbox, calendar coordination, and candidate tracking' }] },
+      { name: 'Candidate assessment & SME interviews', note: 'SME interview panels, candidate profile packets, final round interview exercise design', hrsRange: [20, 35], specialties: ['people', 'operations'],
+        rules: [{ group: 'partner_director', minHrs: 5, severity: 'critical', reason: 'Director-level SME interviews are required for a Director-level hire — candidates expect senior interview presence and peer-level assessment' },
+                { group: 'manager', minHrs: 8, severity: 'expected', reason: 'Manager coordinates interview panels and synthesizes candidate profile packets' },
+                { group: 'associate', minHrs: 6, severity: 'expected', reason: 'Associate schedules interviews, captures interviewer feedback, and assembles candidate packets' }] },
+      { name: 'Offer negotiation & onboarding handoff', note: 'Salary negotiation, offer letter, 90-day onboarding plan, internal/external comms plan', hrsRange: [10, 18], specialties: ['people'],
+        rules: [{ group: 'partner_director', minHrs: 4, severity: 'critical', reason: 'offer negotiation with the finalist is a senior client-facing moment — Partner-Director credibility protects the placement' },
+                { group: 'manager', minHrs: 5, severity: 'expected', reason: 'Manager runs the offer mechanics and drafts the 90-day onboarding plan' },
+                { group: 'associate', minHrs: 3, severity: 'expected', reason: 'Associate prepares the offer letter and comms announcement drafts' }] }
     ]
   },
   // ============================================================
-  // P-07: M&A Integration (5 deliverables)
+  // P-05: Interim HR Director (Tiburcio Vasquez-style)
+  // 4-month embedded role, 20-25 hrs/week. Direct HR compliance,
+  // employee relations, comp/leave admin, HR team supervision.
   // ============================================================
   {
-    code: 'P-08', name: 'M&A Integration', type: 'transform',
-    diff: 4, budget: 385000, tol: 0.03, teamSize: 6, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
-    desc: 'Nine-month post-merger integration of two regional systems creating a $3B combined entity. Integration Management Office across multiple workstreams with a $120M synergy target.',
+    code: 'P-05', name: 'Interim HR Director', type: 'interim',
+    diff: 3, budget: 124000, tol: 0.04, easyBudget: 145000, hardBudget: 105000,
+    teamSize: 5, rolesAvailable: ['partner', 'md', 'srdir', 'dir', 'srmgr', 'mgr', 'srassoc', 'assoc'],
+    timeline: '4 months · 20–25 hrs/week',
+    desc: 'Serve as embedded Interim Director of Human Resources for a Federally Qualified Health Center during leadership transition. Direct HR compliance, employee relations, compensation and leave administration, and supervise the HR department while the search for a permanent leader is underway.',
     deliverables: [
-      { name: 'Project Management', note: 'IMO PMO coordination, weekly status, workstream tracking, SharePoint/doc mgmt, internal comms', hrsRange: [60, 100],
-        rules: [{ group: 'associate', minHrs: 60, severity: 'critical', reason: 'PMO coordination, status reporting, workstream tracking, and SharePoint logistics is analyst execution work — Associates and Sr. Associates run the PM workstream' },
-                { group: 'partner_director', maxHrs: 0, severity: 'critical', reason: 'PMO coordination should not pull Partner-Director time — that is analyst execution work, not senior work' }] },
-      { name: 'IMO leadership & Day-1 readiness', note: 'IMO governance, decision rights, legal close, comms, IT cutover', hrsRange: [200, 300], specialties: ['strategy', 'operations'],
-        rules: [{ group: 'partner_director', minHrs: 100, severity: 'critical', reason: 'IMO leadership is a senior client-facing role — Partner/MD or Sr. Director; Day-1 readiness has zero tolerance for error — needs project lead ownership' },
-                { group: 'manager', minHrs: 50, severity: 'expected', reason: 'a Manager runs the IMO operating cadence, decision-rights matrix, and Day-1 readiness checklist — continuity between Partner direction and Associate execution' },
-                { group: 'associate', minHrs: 30, severity: 'expected', reason: 'Associate maintains the Day-1 tracker, comms artifacts, and IT cutover checklists' }] },
-      { name: 'Synergy tracking & validation', note: '$120M target, baseline, run-rate tracking methodology', hrsRange: [226, 340], specialties: ['finance', 'strategy'],
-        rules: [{ group: 'partner_director', minHrs: 108, severity: 'critical', reason: 'synergy validation methodology must be Partner-owned — credibility of the $120M target depends on it' },
-                { group: 'manager', minHrs: 50, severity: 'expected', reason: 'Manager structures the synergy tracking model and validates run-rate methodology with the workstream leads' },
-                { group: 'associate', minHrs: 108, severity: 'expected', reason: 'tracking is analyst execution' }] },
-      { name: 'Functional workstreams', note: 'Clinical, finance, IT, HR, supply chain, revenue cycle integration', hrsRange: [272, 408], specialties: ['operations', 'finance'],
-        rules: [{ group: 'partner_director', minHrs: 136, severity: 'expected', reason: 'each workstream needs project lead owners; finance integration touches treasury — needs senior finance oversight' },
-                { group: 'manager', minHrs: 80, severity: 'expected', reason: 'workstream leads are Manager-level — they run the cross-functional integration day-to-day' },
-                { group: 'associate', minHrs: 60, severity: 'expected', reason: 'workstream analytics, tracker maintenance, and cross-workstream coordination is Associate execution work' }] },
-      { name: 'Bi-weekly steering & culture program', note: '18 steering readouts, Board, culture survey, comms', hrsRange: [272, 408], specialties: ['strategy', 'governance'],
-        rules: [{ group: 'partner_director', minHrs: 164, severity: 'critical', reason: '18 bi-weekly steering readouts to Board — must be partner/MD-led every time' },
-                { group: 'manager', minHrs: 108, severity: 'expected', reason: 'comms execution is Manager-owned' },
-                { group: 'associate', minHrs: 40, severity: 'expected', reason: 'Associate produces steering decks, runs the culture survey, and assembles comms materials — continuity into every readout' }] },
-      { name: 'Day-100 plan & transition', note: 'Stabilization plan, Year-1 roadmap, handoff to permanent team', hrsRange: [100, 164], specialties: ['strategy', 'operations'],
-        rules: [{ group: 'partner_director', minHrs: 72, severity: 'expected', reason: 'stabilization plan and transition is project lead work' },
-                { group: 'manager', minHrs: 30, severity: 'expected', reason: 'Manager owns the Year-1 roadmap structure and the operating cadence handover' },
-                { group: 'associate', minHrs: 20, severity: 'expected', reason: 'Associate assembles the transition documentation and handover binder' }] }
+      { name: 'Project Management & HR team supervision', note: 'Direct supervision of HR staff, standing meetings, engagement coordination, staff huddles', hrsRange: [60, 100], specialties: ['operations', 'people'],
+        rules: [{ group: 'associate', minHrs: 40, severity: 'critical', reason: 'sustained coordination, meeting logistics, and HR team support work is analyst execution' },
+                { group: 'partner_director', maxHrs: 0, severity: 'critical', reason: 'PM coordination should not pull Partner-Director time — that is analyst execution work, not senior work' }] },
+      { name: 'Policies, procedures & compliance', note: 'Develop, implement, and maintain personnel policies. HR-related compliance across nonprofit, healthcare, and state/federal regs', hrsRange: [60, 90], specialties: ['compliance', 'people'],
+        rules: [{ group: 'manager', minHrs: 20, severity: 'critical', reason: 'policy development and compliance framework requires Manager-level HR ownership' },
+                { group: 'associate', minHrs: 25, severity: 'expected', reason: 'Sr. Associate drafts policies, updates procedure documentation, and maintains the policy library' }] },
+      { name: 'Employee relations & investigations', note: 'Counseling, guidance, training, coaching. Investigate and respond to grievances. Complex personnel issues', hrsRange: [70, 110], specialties: ['people'],
+        rules: [{ group: 'partner_director', minHrs: 25, severity: 'critical', reason: 'complex personnel issues, grievance investigations, and sensitive employee relations carry legal exposure — the Interim HR Director owns these directly' },
+                { group: 'manager', minHrs: 20, severity: 'expected', reason: 'Manager handles routine counseling and coaching, escalating complex issues to the Director' },
+                { group: 'associate', minHrs: 20, severity: 'expected', reason: 'Associate captures investigation notes, maintains employee relations files, and supports training coordination' }] },
+      { name: 'Compensation & leave administration', note: 'Compensation analysis per organizational philosophy, leave of absence administration', hrsRange: [50, 80], specialties: ['people', 'finance'],
+        rules: [{ group: 'manager', minHrs: 15, severity: 'critical', reason: 'comp philosophy application and leave administration is Manager-led operational HR work' },
+                { group: 'associate', minHrs: 22, severity: 'expected', reason: 'Sr. Associate builds comp analysis models and processes leave requests' }] },
+      { name: 'Union labor issues & senior leadership advisory', note: 'Work with senior leadership on union labor matters. Advise executive team on personnel and organizational rules', hrsRange: [40, 60], specialties: ['people', 'governance'],
+        rules: [{ group: 'partner_director', minHrs: 25, severity: 'critical', reason: 'union labor negotiations and executive-level HR counsel are senior-only work — cannot be delegated to Manager or Associate' }] }
     ]
   }
 ];
@@ -2187,7 +2124,18 @@ function renderBrief() {
 
   document.getElementById('briefDesc').textContent = p.desc;
   document.getElementById('scoreText').textContent = state.totalScore;
+  document.getElementById('scoreTotal').textContent = `/ ${PROJECTS.length * 100}`;
   document.getElementById('delCount').textContent = `${p.deliverables.length}`;
+
+  // Timeline chip (optional per-project) — small informational tag,
+  // no scoring impact. Shows engagement duration next to the type chip.
+  const timelineEl = document.getElementById('briefTimeline');
+  if (p.timeline) {
+    timelineEl.textContent = p.timeline;
+    timelineEl.style.display = '';
+  } else {
+    timelineEl.style.display = 'none';
+  }
 
   // Footer: role availability info, inline and compact
   const footerEl = document.getElementById('briefFooter');
@@ -3026,7 +2974,7 @@ function showCelebrate(mode, cost, variance, points, extra = {}) {
     document.getElementById('celNext').style.display = state.current < PROJECTS.length - 1 ? '' : 'none';
     if (state.current === PROJECTS.length - 1 && state.solved.every(Boolean)) {
       document.getElementById('celEmoji').textContent = '🏆';
-      document.getElementById('celTitle').textContent = 'All eight engagements approved.';
+      document.getElementById('celTitle').textContent = 'All five engagements approved.';
       review = null;
       fallbackMsg = `Final score: ${state.totalScore} of ${PROJECTS.length * 100}. Every engagement priced to deliver for the client and protect team economics. Strong work.`;
     }
